@@ -1,47 +1,33 @@
 <?php
 
+use Illuminate\Foundation\Application;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome');
-})->name('home');
+Route::get('/', fn() => Inertia::render('LandingPage'))->name('landing');
 
-Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', fn() => Inertia::render('Login'))->name('login');
+    Route::get('/register', fn() => Inertia::render('Register'))->name('register.page');
 
-Route::get('/test', function () {
-    return Inertia::render('test');
-})->name('test');
-
-Route::get('/landing', function () {
-    return Inertia::render('LandingPage');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.process');
+    Route::post('/register', [RegisteredUserController::class, 'store'])->name('register.process');
 });
 
-Route::get('/reservasi', function () {
-    return Inertia::render('Reservasi');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/landing', fn() => Inertia::render('LandingPage'))->name('landingpage');
+    Route::get('/reservasi', fn() => Inertia::render('Reservasi'));
+    Route::get('/order', fn() => Inertia::render('Order'));
+    Route::get('/user-profile', fn() => Inertia::render('Profile'));
+    Route::get('/admin-dashboard', fn() => Inertia::render('AdminDashboard'));
+    Route::get('/test', fn() => Inertia::render('test'))->name('test');
 });
 
-Route::get('/test1', function () {
-    return Inertia::render('test1');
-});
-
-Route::get('/masuk', function () {
-    return Inertia::render('Register');
-});
-
-Route::get('/loh', function () {
-    return Inertia::render('Login');
-});
-
-Route::get('/order', function () {
-    return Inertia::render('Order');
-});
-
-Route::get('/admin-dashboard', function () {
-    return Inertia::render('AdminDashboard');
-});
+Route::get('/Register', [RegisteredUserController::class, 'create'])
+    ->name('Register');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Providers\RouteServiceProvider;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,47 +15,34 @@ use Laravel\Fortify\Features;
 
 class AuthenticatedSessionController extends Controller
 {
-    /**
-     * Show the login page.
-     */
-    public function create(Request $request): Response
+    public function create()
     {
-        return Inertia::render('auth/Login', [
-            'canResetPassword' => Route::has('password.request'),
-            'status' => $request->session()->get('status'),
-        ]);
+        return Inertia::render('Login');
     }
 
-    /**
-     * Handle an incoming authentication request.
-     */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        $user = $request->validateCredentials();
+        $credentials = $request->validate([
+            'username' => ['required', 'string'],
+            'password' => ['required', 'string'],
+        ]);
 
-        if (Features::enabled(Features::twoFactorAuthentication()) && $user->hasEnabledTwoFactorAuthentication()) {
-            $request->session()->put([
-                'login.id' => $user->getKey(),
-                'login.remember' => $request->boolean('remember'),
+        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
+            return back()->withErrors([
+                'username' => 'Username atau password salah.',
             ]);
-
-            return to_route('two-factor.login');
         }
-
-        Auth::login($user, $request->boolean('remember'));
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $redirect = $request->query('redirect', route('landingpage'));
+
+        return redirect()->intended($redirect); 
     }
 
-    /**
-     * Destroy an authenticated session.
-     */
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

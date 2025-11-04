@@ -1,4 +1,5 @@
-<script setup>
+<script setup lang="ts">
+import { Head } from '@inertiajs/vue3'
 import Navbar from '../components/Navbar.vue'
 import Footer from '../components/Footer.vue'
 import Hero from '../components/Hero1.vue'
@@ -18,7 +19,8 @@ const submitForm = () => {
 </script>
 
 <template>
-  <div class="bg-pink-100 min-h-screen flex flex-col pt-15">
+  <Head title="Reservasi - RonaLaundry" />
+  <div class="flex flex-col min-h-screen bg-pink-100 pt-15">
     <!-- Navbar -->
     <Navbar />
 
@@ -26,34 +28,34 @@ const submitForm = () => {
     <Hero />
 
     <!-- Main Content -->
-    <main class="flex-grow py-16 px-6 flex justify-center items-start">
+    <main class="flex items-start justify-center flex-grow px-6 py-16">
       <div
-        class="bg-white shadow-lg rounded-2xl p-10 w-full max-w-3xl border border-pink-200"
+        class="w-full max-w-3xl p-10 bg-white border border-pink-200 shadow-lg rounded-2xl"
       >
-        <h2 class="text-3xl font-semibold mb-8 text-gray-800 text-center">
+        <h2 class="mb-8 text-3xl font-semibold text-center text-gray-800">
           Reservasi Layanan
         </h2>
 
         <!-- Form -->
         <form
           @submit.prevent="submitForm"
-          class="grid grid-cols-1 gap-y-5 text-gray-700"
+          class="grid grid-cols-1 text-gray-700 gap-y-5"
         >
           <!-- Nama -->
           <div>
-            <label class="block font-medium mb-1">Nama Lengkap</label>
+            <label class="block mb-1 font-medium">Nama Lengkap</label>
             <input
               v-model="nama"
               type="text"
               placeholder="Masukkan nama Anda"
-              class="w-full p-3 rounded-md border border-gray-300 shadow-sm focus:ring-2 focus:ring-pink-400 outline-none"
+              class="w-full p-3 border border-gray-300 rounded-md shadow-sm outline-none focus:ring-2 focus:ring-pink-400"
               required
             />
           </div>
 
           <!-- WhatsApp -->
           <div>
-            <label class="block font-medium mb-1">Nomor WhatsApp</label>
+            <label class="block mb-1 font-medium">Nomor WhatsApp</label>
             <input
               v-model="whatsapp"
               type="tel"
@@ -61,7 +63,7 @@ const submitForm = () => {
               inputmode="numeric"
               pattern="[0-9]*"
               maxlength="15"
-              class="w-full p-3 rounded-md border border-gray-300 shadow-sm focus:ring-2 focus:ring-pink-400 outline-none"
+              class="w-full p-3 border border-gray-300 rounded-md shadow-sm outline-none focus:ring-2 focus:ring-pink-400"
               @input="whatsapp = whatsapp.replace(/[^0-9]/g, '')"
               required
             />
@@ -69,7 +71,7 @@ const submitForm = () => {
 
           <!-- Layanan -->
           <div>
-            <label class="block font-medium mb-2">Pilih Jenis Layanan</label>
+            <label class="block mb-2 font-medium">Pilih Jenis Layanan</label>
             <div class="grid grid-cols-3 gap-3">
               <button
                 v-for="option in ['Kiloan', 'Boneka', 'Karpet', 'Sepatu', 'Setrika', 'Handuk']"
@@ -90,31 +92,31 @@ const submitForm = () => {
 
           <!-- Barang -->
           <div>
-            <label class="block font-medium mb-1">Jenis Barang</label>
+            <label class="block mb-1 font-medium">Jenis Barang</label>
             <input
               v-model="barang"
               type="text"
               placeholder="Contoh: Sprei, Jaket, Bantal"
-              class="w-full p-3 rounded-md border border-gray-300 shadow-sm focus:ring-2 focus:ring-pink-400 outline-none"
+              class="w-full p-3 border border-gray-300 rounded-md shadow-sm outline-none focus:ring-2 focus:ring-pink-400"
               required
             />
           </div>
 
           <!-- Alamat -->
           <div>
-            <label class="block font-medium mb-1">Alamat</label>
+            <label class="block mb-1 font-medium">Alamat</label>
             <textarea
               v-model="alamat"
               rows="2"
               placeholder="Masukkan alamat lengkap Anda"
-              class="w-full p-3 rounded-md border border-gray-300 shadow-sm focus:ring-2 focus:ring-pink-400 outline-none resize-none"
+              class="w-full p-3 border border-gray-300 rounded-md shadow-sm outline-none resize-none focus:ring-2 focus:ring-pink-400"
               required
             ></textarea>
           </div>
 
           <!-- Pembayaran -->
           <div>
-            <label class="block font-medium mb-2">Metode Pembayaran</label>
+            <label class="block mb-2 font-medium">Metode Pembayaran</label>
             <div class="grid grid-cols-3 gap-3">
               <button
                 v-for="option in ['QRIS', 'Transfer', 'Cash']"
@@ -135,11 +137,11 @@ const submitForm = () => {
 
           <!-- Tanggal -->
           <div>
-            <label class="block font-medium mb-1">Tanggal Pengambilan</label>
+            <label class="block mb-1 font-medium">Tanggal Pengambilan</label>
             <input
               v-model="tanggal"
               type="date"
-              class="w-full p-3 rounded-md border border-gray-300 shadow-sm focus:ring-2 focus:ring-pink-400 outline-none"
+              class="w-full p-3 border border-gray-300 rounded-md shadow-sm outline-none focus:ring-2 focus:ring-pink-400"
               required
             />
           </div>
@@ -158,10 +160,10 @@ const submitForm = () => {
         <!-- Ringkasan Pesanan -->
         <div
           v-if="nama || layanan"
-          class="bg-gray-50 p-5 rounded-lg mt-10 shadow-inner border border-gray-200"
+          class="p-5 mt-10 border border-gray-200 rounded-lg shadow-inner bg-gray-50"
         >
-          <h3 class="font-semibold mb-2 text-gray-800">Ringkasan Pesanan:</h3>
-          <ul class="space-y-1 text-gray-700 text-sm">
+          <h3 class="mb-2 font-semibold text-gray-800">Ringkasan Pesanan:</h3>
+          <ul class="space-y-1 text-sm text-gray-700">
             <li><strong>Nama:</strong> {{ nama }}</li>
             <li><strong>WhatsApp:</strong> {{ whatsapp }}</li>
             <li><strong>Layanan:</strong> {{ layanan }}</li>

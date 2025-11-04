@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -36,16 +37,25 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
-
-        return [
-            ...parent::share($request),
-            'name' => config('app.name'),
-            'quote' => ['message' => trim($message), 'author' => trim($author)],
+        return array_merge(parent::share($request), [
+            // membuat data auth tersedia di semua halaman Inertia
             'auth' => [
-                'user' => $request->user(),
+                'user' => fn () => Auth::check()
+                    ? [
+                        'id' => Auth::user()->id,
+                        'name' => Auth::user()->name,
+                        'email' => Auth::user()->email,
+                        'username' => Auth::user()->username ?? null,
+                        'role' => Auth::user()->role ?? null,
+                    ]
+                    : null,
             ],
-            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-        ];
+
+            // flash messages (opsional tapi berguna)
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
+        ]);
     }
 }

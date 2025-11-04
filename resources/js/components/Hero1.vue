@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 // Tidak butuh props untuk sekarang
 </script>
 
@@ -23,7 +23,7 @@
 
       <!-- Deskripsi 3D -->
       <p
-        class="text-base md:text-lg opacity-90 max-w-2xl mx-auto text-pink-50 font-medium transition-all duration-300 hover:scale-105 leading-relaxed"
+        class="text-base md:text-lg opacity-90 max-w-2xl mx-auto text-pink-50 font-medium transition-all duration-300 hover:scale-105 leading-relaxed cursor-pointer"
         style="
           text-shadow:
             1px 1px 0 #ffb6c1,
