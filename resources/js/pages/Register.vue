@@ -147,7 +147,6 @@ const form = ref({
 function handleSubmit() {
     router.post('/register', form.value, {
         onSuccess: () => {
-            alert('Akun berhasil dibuat! Silakan login dulu ya 😊');
             router.visit('/login');
         },
         onError: (errors) => {

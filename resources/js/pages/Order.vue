@@ -15,7 +15,7 @@ const orders = ref([
 ])
 
 function goBack() {
-  router.visit('/dashboard') // arahkan sesuai halaman utama kamu
+  router.visit('/landing') // arahkan sesuai halaman utama kamu
 }
 </script>
 
