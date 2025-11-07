@@ -44,6 +44,28 @@ declare global {
         updated_at: string;
     }
 
+    interface Payment {
+        id: number;
+        orderId: string;
+        userName: string;
+        method: string;
+        total: number;
+        status: string;
+        date: string;
+        proof: string;
+    }
+
+    interface Product {
+        name: string;
+        unit: string;
+        estimate: string;
+        price_regular: number | null;
+        price_express: number | null;
+        description: string;
+        image: string | null;
+        imageFile: File | null;
+    }
+
     type AppPageProps<
         T extends Record<string, unknown> = Record<string, unknown>,
     > = T & {

@@ -30,13 +30,19 @@ Route::middleware(['auth'])->group(function () {
         'user' => Auth::user(),
     ]);
     })->middleware(['auth']);
-    Route::get('/admin-dashboard', fn() => Inertia::render('AdminDashboard'));
+    Route::get('/adminpanel', fn() => Inertia::render('AdminPanel'))->name('adminpanel');
     Route::get('/test', fn() => Inertia::render('test'))->name('test');
     Route::get('/laundryhistory', fn() => Inertia::render('LaundryHistory'))->name('laundryhistory');
     Route::get('/mylaundry', [ReservasiController::class, 'index'])->name('mylaundry');
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/reservasi/store', [ReservasiController::class, 'store'])->name('reservasi.store');
     Route::post('/reservasi/{id}/cancel', [ReservasiController::class, 'cancel'])->name('reservasi.cancel');
+
+    Route::get('/admin', function () {return Inertia::render('admin/Dashboard');})->name('admin.dashboard');
+    Route::get('/admin/users', function () {return Inertia::render('admin/Users');})->name('admin.users');
+    Route::get('/admin/orders', function () {return Inertia::render('admin/Orders');})->name('admin.orders');
+    Route::get('/admin/payments', function () {return Inertia::render('admin/Payments');})->name('admin.payments');
+    Route::get('/admin/products', function () {return Inertia::render('admin/Products');})->name('admin.products');
 });
 
 Route::get('/Register', [RegisteredUserController::class, 'create'])
