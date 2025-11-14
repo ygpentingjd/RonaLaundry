@@ -6,6 +6,7 @@ import { usePage } from '@inertiajs/vue3'
 import Navbar from '../components/Navbar.vue'
 import Hero from '../components/Hero.vue'
 import Footer from '../components/Footer.vue'
+import MapSection from '../components/MapSection.vue'
 
 const navbarHeight = ref('0px')
 
@@ -16,7 +17,7 @@ onMounted(() => {
   }
 })
 
-const page = usePage()
+const page = usePage() as unknown as { props: { auth: any } }
 const isAuthenticated = !!page.props.auth.user
 
 const handlePesanSekarang = () => {
@@ -84,7 +85,7 @@ const handlePesanSekarang = () => {
           </h3>
 
           <!-- 🔹 Grid responsif -->
-          <div class="grid grid-cols-2 gap-10 mt-6 sm:grid-cols-2 md:grid-cols-4 justify-items-center">
+          <div class="grid grid-cols-2 gap-10 mt-6 sm:grid-cols-2 md:grid-cols-4 justify-items-center mr-25 ml-25">
             <div class="flex flex-col items-center">
               <img
                 src="/images/qris.webp"
@@ -175,6 +176,7 @@ const handlePesanSekarang = () => {
       </section>
     </main>
 
+    <MapSection />
     <Footer />
   </div>
 </template>

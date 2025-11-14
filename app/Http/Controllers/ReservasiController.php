@@ -6,6 +6,8 @@ use App\Models\Reservasi;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB; 
+
 
 class ReservasiController extends Controller
 {
@@ -29,13 +31,15 @@ class ReservasiController extends Controller
             'barang' => 'required|array',
             'alamat' => 'required|string',
             'pembayaran' => 'required|string',
+            'metode_pengantaran' => 'required|string',
             'tanggal' => 'required|date',
+            'tanggal_kembali' => 'required|date',
         ]);
 
         $validated['user_id'] = Auth::id();
 
         Reservasi::create($validated);
-
+        
         return redirect()->route('mylaundry')->with('success', 'Reservasi berhasil disimpan!');
     }
 
@@ -45,8 +49,11 @@ class ReservasiController extends Controller
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
-        $reservasi->status = 'Batal';
-        $reservasi->save();
+        $reservasi->delete();
+
+        if (Reservasi::count() === 0) {
+            DB::statement('ALTER TABLE reservasis AUTO_INCREMENT = 1');
+        }
 
         return redirect()->back()->with('success', 'Reservasi dibatalkan.');
     }

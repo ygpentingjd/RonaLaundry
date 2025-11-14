@@ -21,6 +21,8 @@ return new class extends Migration {
             $table->integer('harga_per_kg')->nullable();
             $table->integer('total')->nullable();
             $table->string('status')->default('Menunggu Penjemputan');
+            $table->string('metode_pengantaran')->nullable();
+            $table->date('tanggal_kembali')->nullable();
             $table->string('payment_status')->default('Pending');
             $table->timestamps();
         });

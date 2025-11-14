@@ -51,6 +51,7 @@ import { usePage } from "@inertiajs/vue3";
 const page = usePage();
 
 const menus = ref([
+  { text: "Beranda", icon: "home", link: "/landing" },
   { text: "Dashboard", icon: "dashboard", link: "/admin" },
   { text: "Products", icon: "inventory_2", link: "/admin/products" },
   { text: "Users", icon: "group", link: "/admin/users" },
@@ -58,7 +59,7 @@ const menus = ref([
   { text: "Payment Verification", icon: "payments", link: "/admin/payments" },
 ]);
 
-const isActive = (link) => {
+const isActive = (link: string) => {
   // Kalau link = '/admin', aktif hanya kalau benar-benar di /admin
   if (link === "/admin") {
     return page.url === "/admin";

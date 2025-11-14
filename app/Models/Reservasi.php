@@ -18,6 +18,8 @@ class Reservasi extends Model
         'alamat',
         'pembayaran',
         'tanggal',
+        'tanggal_kembali',
+        'metode_pengantaran',
         'berat',
         'harga_per_kg',
         'total',

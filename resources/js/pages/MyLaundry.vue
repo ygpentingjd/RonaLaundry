@@ -177,7 +177,18 @@ const toggleDetail = (id: number) => {
 
 const cancelOrder = (id: number) => {
   if (confirm('Yakin ingin membatalkan pesanan ini?')) {
-    router.post(`/reservasi/${id}/cancel`)
+    router.post(`/reservasi/${id}/cancel`, {}, {
+      onSuccess: () => {
+        // Hapus pesanan dari tampilan secara lokal
+        orders.value = orders.value.filter(order => order.id !== id)
+        
+        // Opsional: tampilkan notifikasi
+        alert('Pesanan berhasil dibatalkan!')
+      },
+      onError: () => {
+        alert('Gagal membatalkan pesanan. Silakan coba lagi.')
+      }
+    })
   }
 }
 

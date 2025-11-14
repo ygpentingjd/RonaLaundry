@@ -2,11 +2,11 @@
   <section class="flex flex-col">
 
     <!-- 🔹 Hero Utama -->
-    <div class="bg-pink-100 min-h-screen flex items-center justify-center px-6 md:px-10">
-      <div class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 w-full max-w-5xl">
+    <div class="flex items-center justify-center min-h-screen px-6 bg-pink-100 md:px-10">
+      <div class="flex flex-col items-center justify-center w-full max-w-5xl gap-4 md:flex-row md:gap-6">
         <!-- 🔸 Teks -->
-        <div class="md:w-1/2 text-right">
-          <h1 class="text-3xl md:text-5xl font-serif text-gray-800 leading-snug md:leading-tight">
+        <div class="text-right md:w-1/2">
+          <h1 class="font-serif text-3xl leading-snug text-gray-800 md:text-5xl md:leading-tight">
             No.1 <br />
             Laundry <br />
             Express di <br />
@@ -15,7 +15,7 @@
         </div>
 
         <!-- 🔸 Gambar -->
-        <div class="md:w-1/2 flex justify-center md:justify-start">
+        <div class="flex justify-center md:w-1/2 md:justify-start">
           <img
             src="/images/laundry.png"
             alt="Laundry Illustration"
@@ -26,12 +26,12 @@
     </div>
 
     <!-- 🔹 Grid Layanan -->
-    <div class="bg-white py-24 flex justify-center items-center">
-      <div class="max-w-6xl mx-auto px-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-x-18 gap-y-12">
+    <div class="flex items-center justify-center py-24 bg-white">
+      <div class="grid max-w-6xl grid-cols-2 px-6 mx-auto sm:grid-cols-3 md:grid-cols-3 gap-x-18 gap-y-12">
         <div
           v-for="(item, index) in items"
           :key="index"
-          class="flex flex-col items-center rounded-2xl p-8 cursor-pointer hover:scale-105 transition"
+          class="flex flex-col items-center p-8 transition cursor-pointer rounded-2xl hover:scale-105"
           :class="item.bg"
           @click="openModal(item)"
         >
@@ -44,17 +44,17 @@
     <!-- 🔹 Modal -->
     <div
       v-if="selectedItem"
-      class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
       @click.self="closeModal"
     >
-      <div class="bg-white rounded-2xl shadow-xl p-8 max-w-xxl w-fulll text-center relative">
+      <div class="relative p-8 text-center bg-white shadow-xl rounded-2xl max-w-xxl w-fulll">
         <img :src="selectedItem.img" :alt="selectedItem.name" class="w-40 mx-auto mb-7" />
-        <h2 class="text-2xl font-semibold mb-2 text-gray-800">{{ selectedItem.name }}</h2>
-        <p class="text-gray-700 text-lg leading-relaxed mb-4">{{ selectedItem.desc }}</p>
-        <p class="text-lg font-bold text-pink-600 mb-6">💸 {{ selectedItem.price }}</p>
+        <h2 class="mb-2 text-2xl font-semibold text-gray-800">{{ selectedItem.name }}</h2>
+        <p class="mb-4 text-lg leading-relaxed text-gray-700">{{ selectedItem.desc }}</p>
+        <p class="mb-6 text-lg font-bold text-pink-600">💸 {{ selectedItem.price }}</p>
         <button
           @click="closeModal"
-          class="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-lg shadow-md transition"
+          class="px-6 py-2 text-white transition bg-pink-500 rounded-lg shadow-md hover:bg-pink-600"
         >
           Tutup
         </button>
@@ -66,7 +66,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const items = [
+const items: Item[] = [
   {
     name: 'Selimut',
     img: '/images/selimut1.png',
@@ -111,11 +111,12 @@ const items = [
   },
 ]
 
-const selectedItem = ref(null)
+const selectedItem = ref<Item | null>(null)
 
-const openModal = (item) => {
+const openModal = (item: Item) => {
   selectedItem.value = item
 }
+
 
 const closeModal = () => {
   selectedItem.value = null
