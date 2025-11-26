@@ -1,5 +1,6 @@
 <template>
     <AdminPanel>
+      <Head title="Dasboard Admin - RonaLaundry" />
       <!-- 🔹 Header -->
       <div class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-semibold mb-6 text-pink-700">Daftar Produk Laundry</h1>
@@ -92,6 +93,7 @@
   
   <script setup lang="ts">
   import AdminPanel from '../AdminPanel.vue'
+  import { Head } from '@inertiajs/vue3'
   import { ref } from 'vue'
   import type { ApexOptions } from 'apexcharts'
   import ApexCharts from 'vue3-apexcharts'

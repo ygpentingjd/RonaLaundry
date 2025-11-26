@@ -24,6 +24,9 @@ class User extends Authenticatable
         'nomor_telepon',
         'alamat_lengkap',
         'catatan_lokasi',
+        'role',
+        'last_activity',
+        'status',
     ];
 
     /**
@@ -44,4 +47,12 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function isOnline()
+    {
+        return $this->last_activity &&
+           $this->last_activity > now()->subMinutes(5);
+
+    }
+
 }

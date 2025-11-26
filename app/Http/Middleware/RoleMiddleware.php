@@ -11,15 +11,14 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, $role)
     {
-        // Pastikan user sudah login
+        // Jika belum login → redirect ke login
         if (!Auth::check()) {
             return redirect('/login');
         }
 
-        // Cek apakah user memiliki role yang sesuai
-        $user = Auth::user(); 
-        if ($user->role !== $role) {
-            abort(403, 'Unauthorized');
+        // Jika role tidak cocok → tolak
+        if (Auth::user()->role !== $role) {
+            return redirect('/')->with('error', 'Akses ditolak.');
         }
 
         return $next($request);

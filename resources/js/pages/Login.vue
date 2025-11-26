@@ -120,19 +120,15 @@ const form = useForm({
 });
 
 function handleLogin() {
-  form.post('/login', {
-    onSuccess: () => {
-      console.log('Login berhasil')
-      const redirectTo = localStorage.getItem('afterLoginRedirect')
+  // jika ada afterLoginRedirect yang disimpan (misal user menekan reservasi sebelum login),
+  // kirim sebagai query 'redirect' ke server agar server bisa redirect ke tempat itu.
+  const redirectTo = localStorage.getItem('afterLoginRedirect')
+  const url = redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}` : '/login'
 
-      if (redirectTo) {
-        // Arahkan ke halaman reservasi
-        localStorage.removeItem('afterLoginRedirect') // hapus setelah digunakan
-        router.visit(redirectTo)
-      } else {
-        // Default: ke landing page
-        router.visit('/landing')
-      }
+  form.post(url, {
+    onSuccess: () => {
+      // jangan panggil router.visit('/landing') — Inertia akan mengikuti redirect dari server
+      localStorage.removeItem('afterLoginRedirect') // hapus agar tidak ketempel lagi
     },
     onError: () => {
       alert('Login gagal! Periksa kembali username dan password anda.')

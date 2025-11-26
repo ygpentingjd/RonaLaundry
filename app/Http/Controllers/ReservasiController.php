@@ -34,6 +34,7 @@ class ReservasiController extends Controller
             'metode_pengantaran' => 'required|string',
             'tanggal' => 'required|date',
             'tanggal_kembali' => 'required|date',
+            'pesan' => 'nullable|string',
         ]);
 
         $validated['user_id'] = Auth::id();

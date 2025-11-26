@@ -17,6 +17,7 @@ class AdminOrderController extends Controller
                 'address' => $order->alamat,
                 'service' => $order->layanan,
                 'stuff' => is_array($order->barang) ? implode(', ', $order->barang) : $order->barang,
+                'message' => $order->pesan,
                 'orderStatus' => $order->status_pesanan ?? $order->status,
                 'paymentStatus' => $order->status_pembayaran ?? $order->payment_status,
                 'pricePerKg' => $order->harga_per_kg ?? 3000,
@@ -32,6 +33,33 @@ class AdminOrderController extends Controller
             'orders' => $orders,
         ]);
     }
+
+    public function getData()
+    {
+        $orders = Reservasi::orderBy('created_at', 'desc')->get()->map(function ($order) {
+            return [
+                'id' => $order->id,
+                'customer' => $order->nama,
+                'address' => $order->alamat,
+                'service' => $order->layanan,
+                'stuff' => is_array($order->barang) ? implode(', ', $order->barang) : $order->barang,
+                'message' => $order->pesan,
+                'orderStatus' => $order->status_pesanan ?? $order->status,
+                'paymentStatus' => $order->status_pembayaran ?? $order->payment_status,
+                'pricePerKg' => $order->harga_per_kg ?? 3000,
+                'weight' => $order->berat ?? 0,
+                'orderDate' => $order->tanggal,
+                'returnDate' => $order->tanggal_kembali,
+                'deliveryMethod' => $order->metode_pengantaran,
+                'date' => $order->created_at->format('d M Y | H:i') . ' WIB',
+            ];  
+        });
+
+        return response()->json([
+            'orders' => $orders
+        ]);
+    }
+
 
     public function update(Request $request, $id)
     {

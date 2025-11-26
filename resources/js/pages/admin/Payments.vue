@@ -1,5 +1,6 @@
 <template>
   <AdminPanel>
+    <Head title="Payments Verification - RonaLaundry" />
     <!-- 🔹 Header -->
     <div class="flex justify-between items-center mb-8">
       <h1 class="text-3xl font-semibold text-pink-700">Payment Verification</h1>
@@ -149,8 +150,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import AdminPanel from "../AdminPanel.vue";
+import { ref, computed } from "vue"
+import { Head } from '@inertiajs/vue3'
+import AdminPanel from "../AdminPanel.vue"
 
 // 🔹 Data dummy
 const payments = ref([

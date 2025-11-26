@@ -1,7 +1,7 @@
 <template>
   <Head title="My Laundry - RonaLaundry" />
   <UserLayout>
-    <div class="flex justify-between items-center mb-8">
+    <div class="flex items-center justify-between mb-8">
       <h2 class="text-2xl font-bold text-gray-800">My Laundry</h2>
     </div>
 
@@ -9,30 +9,30 @@
       <div
         v-for="order in orders"
         :key="order.id"
-        class="bg-pink-50 border border-pink-100 rounded-2xl p-6 shadow-md transition duration-200 hover:shadow-lg"
+        class="p-6 transition duration-200 border border-pink-100 shadow-md bg-pink-50 rounded-2xl hover:shadow-lg"
       >
         <!-- Header Card -->
-        <div class="flex justify-between items-center">
+        <div class="flex items-center justify-between">
           <div>
             <div class="flex items-center gap-3">
               <div
-                class="bg-pink-400 text-white w-8 h-8 flex items-center justify-center rounded-full font-semibold"
+                class="flex items-center justify-center w-8 h-8 font-semibold text-white bg-pink-400 rounded-full"
               >
-                <span class="material-icons text-sm">local_laundry_service</span>
+                <span class="text-sm material-icons">local_laundry_service</span>
               </div>
               <h3 class="text-lg font-semibold text-gray-800">
                 {{ order.layanan }}
               </h3>
             </div>
-            <div class="text-sm text-gray-500 mt-1 flex items-center gap-1">
-              <span class="material-icons text-sm">schedule</span>
+            <div class="flex items-center gap-1 mt-1 text-sm text-gray-500">
+              <span class="text-sm material-icons">schedule</span>
               {{ formatFullDate(order.tanggal) }}
             </div>
           </div>
 
           <button
             @click="toggleDetail(order.id)"
-            class="bg-pink-400 hover:bg-pink-500 text-white px-4 py-1 rounded-lg text-sm shadow transition"
+            class="px-4 py-1 text-sm text-white transition bg-pink-400 rounded-lg shadow hover:bg-pink-500"
           >
             {{ expandedOrder === order.id ? 'Tutup ▲' : 'Lihat Detail ▼' }}
           </button>
@@ -42,11 +42,11 @@
         <transition name="fade">
           <div
             v-if="expandedOrder === order.id"
-            class="mt-5 text-sm text-gray-700 space-y-4"
+            class="mt-5 space-y-4 text-sm text-gray-700"
           >
             <!-- Identitas Pemesan -->
             <div>
-              <p class="font-semibold mb-2">Identitas Pemesan</p>
+              <p class="mb-2 font-semibold">Identitas Pemesan</p>
               <table class="w-full mb-2">
                 <tbody>
                   <tr>
@@ -67,9 +67,9 @@
 
             <!-- Status Pembayaran -->
             <div>
-              <p class="font-semibold mb-2">Status Pembayaran</p>
+              <p class="mb-2 font-semibold">Status Pembayaran</p>
               <span
-                class="px-3 py-1 rounded-full text-sm font-medium"
+                class="px-3 py-1 text-sm font-medium rounded-full"
                 :class="{
                   'bg-yellow-100 text-yellow-700': order.payment_status === 'Pending',
                   'bg-green-100 text-green-700': order.payment_status === 'Verified',
@@ -82,9 +82,9 @@
 
             <!-- Status Pesanan -->
             <div>
-              <p class="font-semibold mb-2 mt-4">Status Pesanan</p>
+              <p class="mt-4 mb-2 font-semibold">Status Pesanan</p>
               <span
-                class="px-3 py-1 rounded-full text-sm font-medium border"
+                class="px-3 py-1 text-sm font-medium border rounded-full"
                 :class="statusClass(order.status)"
               >
                 {{ order.status }}
@@ -93,12 +93,16 @@
 
             <!-- Detail Order -->
             <div>
-              <p class="font-semibold mb-2 mt-4">Detail Order</p>
+              <p class="mt-4 mb-2 font-semibold">Detail Order</p>
               <table class="w-full mb-4">
                 <tbody>
                   <tr>
                     <td class="py-1">Jenis Barang</td>
                     <td class="py-1 text-right">{{ order.barang.join(', ') }}</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1">Pesan Tambahan</td>
+                    <td class="py-1 text-right text-gray-600">{{ order.pesan }}</td>
                   </tr>
                   <tr>
                     <td class="py-1">Harga per Kg</td>
@@ -108,13 +112,13 @@
                   </tr>
                   <tr>
                     <td class="py-1">Berat Laundry</td>
-                    <td class="py-1 text-right text-gray-600 italic">
+                    <td class="py-1 italic text-right text-gray-600">
                       {{ order.berat ? order.berat + ' kg' : 'Menunggu input admin' }}
                     </td>
                   </tr>
                   <tr>
                     <td class="pt-3 font-semibold">Total</td>
-                    <td class="pt-3 text-right font-bold text-gray-900">
+                    <td class="pt-3 font-bold text-right text-gray-900">
                       Rp {{
                         order.total
                           ? order.total.toLocaleString()
@@ -143,15 +147,15 @@
             </div>
 
             <!-- Waktu Update -->
-            <div class="text-xs text-gray-500 mt-4 flex items-center gap-1">
-              <span class="material-icons text-sm">update</span>
+            <div class="flex items-center gap-1 mt-4 text-xs text-gray-500">
+              <span class="text-sm material-icons">update</span>
               {{ formatFullDate(order.updated_at) }}
             </div>
           </div>
         </transition>
       </div>
 
-      <p v-if="orders.length === 0" class="text-gray-500 text-center mt-10">
+      <p v-if="orders.length === 0" class="mt-10 text-center text-gray-500">
         Tidak ada pesanan aktif saat ini!
       </p>
     </div>

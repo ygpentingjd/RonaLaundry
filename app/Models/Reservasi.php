@@ -25,6 +25,7 @@ class Reservasi extends Model
         'total',
         'status',
         'payment_status',
+        'pesan'
     ];
 
     protected $casts = [
