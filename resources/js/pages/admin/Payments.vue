@@ -1,4 +1,4 @@
-<template>
+kok tampilannya jadi bedaaa sama yang sebelumnya <template>
   <AdminPanel>
     <!-- 🔹 Header -->
     <div class="flex justify-between items-center mb-8">
@@ -148,102 +148,59 @@
   </AdminPanel>
 </template>
 
-<script setup lang="ts">
-import { ref, computed } from "vue";
+<script setup>
+import { ref, computed, onMounted } from "vue";
 import AdminPanel from "../AdminPanel.vue";
+import axios from "axios";
 
-// 🔹 Data dummy
-const payments = ref([
-  {
-    id: 1,
-    orderId: "ORD001",
-    userName: "Siti",
-    method: "QRIS",
-    total: 50000,
-    status: "Pending",
-    date: "2025-11-04",
-    proof: "/images/sample-proof.jpg",
-  },
-  {
-    id: 2,
-    orderId: "ORD002",
-    userName: "Budi",
-    method: "BNI",
-    total: 85000,
-    status: "Verified",
-    date: "2025-11-03",
-    proof: "/images/sample-proof.jpg",
-  },
-  {
-    id: 3,
-    orderId: "ORD003",
-    userName: "Andi",
-    method: "COD",
-    total: 70000,
-    status: "Rejected",
-    date: "2025-11-02",
-    proof: "/images/sample-proof.jpg",
-  },
-  {
-    id: 4,
-    orderId: "ORD004",
-    userName: "Dewi",
-    method: "BSI",
-    total: 60000,
-    status: "Pending",
-    date: "2025-11-04",
-    proof: "/images/sample-proof.jpg",
-  },
-]);
-
-// 🔹 State
+const payments = ref([]);
 const filterStatus = ref("All");
-const selectedPayment = ref<Payment | null>(null);
+const selectedPayment = ref(null);
 const isRefreshing = ref(false);
 
-// 🔹 Filtered Data
+// 🔹 Ambil data dari Laravel
+const loadPayments = async () => {
+  const res = await axios.get("/admin/payments/data");
+  payments.value = res.data;
+};
+
+// 🔹 Load saat halaman dibuka
+onMounted(() => {
+  loadPayments();
+});
+
+// 🔹 Filter
 const filteredPayments = computed(() => {
   if (filterStatus.value === "All") return payments.value;
   return payments.value.filter((p) => p.status === filterStatus.value);
 });
 
 // 🔹 Actions
-const viewDetails = (payment: any) => {
+const viewDetails = (payment) => {
   selectedPayment.value = payment;
 };
 
-const verifyPayment = (id: any) => {
-  const payment = payments.value.find((p) => p.id === id);
-  if (payment) payment.status = "Verified";
+const verifyPayment = async (id) => {
+  await axios.post(`/admin/payment/${id}/verify`);
+  await loadPayments();
   selectedPayment.value = null;
-  alert("✅ Payment verified successfully!");
 };
 
-const rejectPayment = (id: any) => {
-  const payment = payments.value.find((p) => p.id === id);
-  if (payment) payment.status = "Rejected";
+const rejectPayment = async (id) => {
+  await axios.post(`/admin/payment/${id}/reject`);
+  await loadPayments();
   selectedPayment.value = null;
-  alert("❌ Payment rejected.");
 };
 
 const closeModal = () => {
   selectedPayment.value = null;
 };
 
-// 🔹 Refresh Button Animation
+// 🔹 Refresh
 const refreshData = async () => {
-  try {
-    isRefreshing.value = true;
-    // Simulasi delay (misal fetch API)
-    await new Promise((r) => setTimeout(r, 1000));
-
-    alert("✅ Payment data refreshed!");
-  } catch (err) {
-    console.error("Refresh failed:", err);
-    alert("❌ Failed to refresh data.");
-  } finally {
-    isRefreshing.value = false;
-  }
+  isRefreshing.value = true;
+  await loadPayments();
+  setTimeout(() => (isRefreshing.value = false), 600);
 };
 </script>
 
@@ -269,4 +226,4 @@ const refreshData = async () => {
 }
 
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap");
-</style>
+</style> 

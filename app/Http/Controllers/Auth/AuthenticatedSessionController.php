@@ -35,9 +35,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        $redirect = $request->query('redirect', route('landingpage'));
+        if (Auth::user() && Auth::user()->role === 'admin') {
+        return redirect()->intended(route('landing'));
+    }
 
-        return redirect()->intended($redirect); 
+        // default untuk user biasa
+        return redirect()->intended(route('landingpage')); 
     }
 
     public function destroy(Request $request): RedirectResponse

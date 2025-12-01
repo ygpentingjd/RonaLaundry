@@ -20,8 +20,6 @@ class Reservasi extends Model
         'tanggal',
         'tanggal_kembali',
         'metode_pengantaran',
-        'berat',
-        'harga_per_kg',
         'total',
         'status',
         'payment_status',
@@ -35,5 +33,10 @@ class Reservasi extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function infoPembayaran()
+    {
+         return $this->hasOne(Pembayaran::class, 'reservasi_id');
     }
 }

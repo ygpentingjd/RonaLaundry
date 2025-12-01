@@ -80,6 +80,34 @@
               </span>
             </div>
 
+            <!-- ❗ UPLOAD BUKTI PEMBAYARAN -->
+            <div v-if="order.payment_status === 'Pending'">
+              <p class="font-semibold mb-2 mt-4">Upload Bukti Pembayaran</p>
+
+              <!-- Jika sudah upload -->
+              <div v-if="order.bukti_pembayaran" class="mb-3">
+                <img
+                  :src="`/storage/${order.bukti_pembayaran}`"
+                  class="w-40 rounded-lg shadow"
+                />
+              </div>
+
+              <input
+                type="file"
+                class="mb-3"
+                accept="image/*"
+                @change="e => selectPaymentFile(e, order.id)"
+              />
+
+              <button
+                @click="uploadPayment(order.id)"
+                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow"
+              >
+                Upload
+              </button>
+            </div>
+            <!-- END UPLOAD -->
+
             <!-- Status Pesanan -->
             <div>
               <p class="font-semibold mb-2 mt-4">Status Pesanan</p>
@@ -101,29 +129,12 @@
                     <td class="py-1 text-right">{{ order.barang.join(', ') }}</td>
                   </tr>
                   <tr>
-                    <td class="py-1">Harga per Kg</td>
-                    <td class="py-1 text-right">
-                      Rp {{ order.harga_per_kg ? order.harga_per_kg.toLocaleString() : '-' }}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="py-1">Berat Laundry</td>
-                    <td class="py-1 text-right text-gray-600 italic">
-                      {{ order.berat ? order.berat + ' kg' : 'Menunggu input admin' }}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="pt-3 font-semibold">Total</td>
-                    <td class="pt-3 text-right font-bold text-gray-900">
-                      Rp {{
-                        order.total
-                          ? order.total.toLocaleString()
-                          : order.berat && order.harga_per_kg
-                            ? (order.berat * order.harga_per_kg).toLocaleString()
-                            : '—'
-                      }}
-                    </td>
-                  </tr>
+  <td class="pt-3 font-semibold">Total</td>
+  <td class="pt-3 text-right font-bold text-gray-900">
+    Rp {{ order.total ? order.total.toLocaleString() : '—' }}
+  </td>
+</tr>
+
                   <tr>
                     <td class="py-1">Metode Pembayaran</td>
                     <td class="py-1 text-right">{{ order.pembayaran }}</td>
@@ -164,13 +175,29 @@ import UserLayout from '@/layouts/UserLayout.vue'
 import { ref } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
 
-const { props } = usePage<AppPageProps<{ reservasis: Order[] }>>()
+// 🔹 Tipe sesuai data yang dikirim (bukti_pembayaran sudah di level utama)
+interface Order {
+  id: number
+  layanan: string
+  tanggal: string
+  nama: string
+  alamat: string
+  payment_status: 'Pending' | 'Verified' | 'Rejected'
+  bukti_pembayaran: string | null // ✅ sekarang tersedia!
+  status: string
+  barang: string[]
+  harga_per_kg: number | null
+  berat: number | null
+  total: number | null
+  pembayaran: string // metode pembayaran (string)
+  updated_at: string
+}
 
-/* --- deklarasi ref dengan tipe eksplisit --- */
+const { props } = usePage<{ reservasis: Order[] }>()
 const orders = ref<Order[]>(props.reservasis || [])
 const expandedOrder = ref<number | null>(null)
+const paymentFiles = ref<Record<number, File | null>>({})
 
-/* --- fungsi dengan parameter bertipe --- */
 const toggleDetail = (id: number) => {
   expandedOrder.value = expandedOrder.value === id ? null : id
 }
@@ -179,20 +206,47 @@ const cancelOrder = (id: number) => {
   if (confirm('Yakin ingin membatalkan pesanan ini?')) {
     router.post(`/reservasi/${id}/cancel`, {}, {
       onSuccess: () => {
-        // Hapus pesanan dari tampilan secara lokal
         orders.value = orders.value.filter(order => order.id !== id)
-        
-        // Opsional: tampilkan notifikasi
         alert('Pesanan berhasil dibatalkan!')
       },
       onError: () => {
-        alert('Gagal membatalkan pesanan. Silakan coba lagi.')
+        alert('Gagal membatalkan pesanan.')
       }
     })
   }
 }
 
-/* status bisa undefined/null => beri tipe union */
+const selectPaymentFile = (e: Event, id: number) => {
+  const input = e.target as HTMLInputElement
+  if (input.files?.length) {
+    paymentFiles.value[id] = input.files[0]
+  }
+}
+
+const uploadPayment = (id: number) => {
+  if (!paymentFiles.value[id]) {
+    alert('Silakan pilih gambar bukti terlebih dahulu.')
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('bukti_pembayaran', paymentFiles.value[id]!)
+
+  // ✅ Sesuai route: /payment/upload/{id}
+  router.post(`/payment/upload/${id}`, formData, {
+    forceFormData: true,
+    onSuccess: () => {
+      alert('Bukti pembayaran berhasil diupload!')
+      // Refresh agar data terbaru (termasuk bukti_pembayaran) muncul
+      router.visit(route('mylaundry'), { preserveState: false, preserveScroll: true })
+    },
+    onError: (errors) => {
+      console.error('Upload error:', errors)
+      alert('Gagal upload. Cek file (max 2MB, JPG/PNG).')
+    }
+  })
+}
+
 const statusClass = (status?: string | null): string => {
   if (!status) return 'bg-gray-100 text-gray-700 border-gray-300'
   const s = status.toLowerCase()
@@ -204,23 +258,11 @@ const statusClass = (status?: string | null): string => {
   return 'bg-gray-100 text-gray-700 border-gray-300'
 }
 
-/* formatFullDate: parameter bertipe string | null | undefined */
 const formatFullDate = (dateStr?: string | null): string => {
   if (!dateStr) return '-'
   const date = new Date(dateStr)
-
-  const tanggal = date.toLocaleDateString('id-ID', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
-  })
-
-  const waktu = date.toLocaleTimeString('id-ID', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  }).replace(':', '.')
-
+  const tanggal = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
+  const waktu = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.')
   return `${tanggal} | ${waktu} WIB`
 }
 </script>

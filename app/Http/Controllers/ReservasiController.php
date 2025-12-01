@@ -6,21 +6,48 @@ use App\Models\Reservasi;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB; 
-
+use Illuminate\Support\Facades\DB;
 
 class ReservasiController extends Controller
 {
     public function index()
-    {
-        $reservasis = Reservasi::where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc')
-            ->get();
+{
+    $reservasis = Reservasi::with('infoPembayaran')
+        ->where('user_id', Auth::id())
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->map(function ($r) {
+            return [
+                'id' => $r->id,
+                'layanan' => $r->layanan,
+                'tanggal' => $r->tanggal,
+                'nama' => $r->nama,
+                'alamat' => $r->alamat,
 
-        return Inertia::render('MyLaundry', [
-            'reservasis' => $reservasis
-        ]);
-    }
+                // Payment status
+                'payment_status' => $r->payment_status,
+                'pembayaran' => $r->pembayaran,
+
+                // Bukti pembayaran
+                'bukti_pembayaran' => $r->infoPembayaran->bukti_pembayaran ?? null,
+
+                // Status order
+                'status' => $r->status,
+
+                // Total harga final dari admin
+                'total' => $r->total,
+                 'barang' => is_array($r->barang) ? $r->barang : [],
+
+                'updated_at' => $r->updated_at,
+            ];
+        });
+
+    return Inertia::render('MyLaundry', [
+        'reservasis' => $reservasis
+    ]);
+}
+
+
 
     public function store(Request $request)
     {
@@ -37,9 +64,11 @@ class ReservasiController extends Controller
         ]);
 
         $validated['user_id'] = Auth::id();
+        $validated['status'] = 'Menunggu Penjemputan';
+        $validated['payment_status'] = 'Pending'; // atau sesuai logika
 
         Reservasi::create($validated);
-        
+
         return redirect()->route('mylaundry')->with('success', 'Reservasi berhasil disimpan!');
     }
 

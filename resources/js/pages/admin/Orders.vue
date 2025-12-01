@@ -229,43 +229,23 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="py-1">Harga per Kg</td>
-                                        <td class="py-1 text-right">
-                                            Rp
-                                            {{
-                                                order.pricePerKg.toLocaleString()
-                                            }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1">Berat Laundry</td>
-                                        <td class="py-1 text-right">
-                                            <input
-                                                v-model.number="order.weight"
-                                                type="number"
-                                                min="0"
-                                                step="0.1"
-                                                placeholder="(kg)"
-                                                class="w-24 px-2 py-1 text-sm text-right border rounded-lg focus:ring-2 focus:ring-pink-300 focus:outline-none"
-                                            />
-                                        </td>
+                                    <td class="py-1">Total Harga</td>
+                                    <td class="py-1 text-right">
+                                        <input 
+                                        v-model.number="order.total"
+                                        type="number"
+                                        min="0"
+                                        placeholder="Isi total"
+                                        class="w-32 px-2 py-1 text-sm text-right border rounded-lg focus:ring-2 focus:ring-pink-300 focus:outline-none"
+                                        />
+                                    </td>
                                     </tr>
                                     <tr>
                                         <td class="pt-3 font-semibold">
                                             Total
                                         </td>
-                                        <td
-                                            class="pt-3 font-bold text-right text-gray-900"
-                                        >
-                                            Rp
-                                            {{
-                                                order.weight
-                                                    ? (
-                                                          order.weight *
-                                                          order.pricePerKg
-                                                      ).toLocaleString()
-                                                    : '—'
-                                            }}
+                                        <td class="pt-3 font-bold text-right text-gray-900">
+                                         Rp {{ order.total ? order.total.toLocaleString() : '—' }}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -305,34 +285,33 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import axios from 'axios';
 import AdminPanel from '../AdminPanel.vue';
 
-const expandedOrder = ref(null);
-const openDropdown = ref(null);
-const searchQuery = ref('');
-
+// ------------------------------------------------
+// PROPS & STATE
+// ------------------------------------------------
 const props = defineProps<{
     orders: Array<AdminOrder>;
 }>();
 
-const orders = ref(props.orders || [])
+// orders utama yang akan berubah ketika refresh
+const orders = ref(props.orders || []);
 
-const statusOptions = [
-    'Menunggu Penjemputan',
-    'Sedang Diproses',
-    'Selesai Diproses',
-    'Siap Diambil',
-    'Siap Diantar',
-    'Batal',
-];
+// UI states
+const expandedOrder = ref<number | null>(null);
+const openDropdown = ref<number | null>(null);
+const searchQuery = ref('');
+const isRefreshing = ref(false);
 
-// ----------------- SEARCH LOGIC -----------------
-// computed filteredOrders: mencari di banyak field (case-insensitive)
+// ------------------------------------------------
+// SEARCH FILTER
+// ------------------------------------------------
 const filteredOrders = computed(() => {
     const q = searchQuery.value.trim().toLowerCase();
     if (!q) return orders.value;
 
-    return orders.value.filter((order) => {
+    return orders.value.filter((order: any) => {
         const fields = [
             String(order.id),
             order.customer,
@@ -350,18 +329,20 @@ const filteredOrders = computed(() => {
             String(order.pricePerKg),
             String(order.weight),
             String(order.total),
-        ].map(f => (f || '').toLowerCase());
+        ].map((f) => (f || '').toLowerCase());
 
-        return fields.some(f => f.includes(q));
+        return fields.some((f) => f.includes(q));
     });
 });
-// ------------------------------------------------
 
-const toggleDetail = (id: any) => {
+// ------------------------------------------------
+// UI HANDLERS
+// ------------------------------------------------
+const toggleDetail = (id: number) => {
     expandedOrder.value = expandedOrder.value === id ? null : id;
 };
 
-const toggleDropdown = (id: any) => {
+const toggleDropdown = (id: number) => {
     openDropdown.value = openDropdown.value === id ? null : id;
 };
 
@@ -370,70 +351,54 @@ const selectStatus = (order: any, status: string) => {
     openDropdown.value = null;
 };
 
+// ------------------------------------------------
+// UPDATE & DELETE
+// ------------------------------------------------
 const updateOrder = (order: any) => {
-    if (!order.weight || order.weight <= 0) {
-        alert('Masukkan berat laundry terlebih dahulu!');
-        return;
-    }
+    if (order.total == null || order.total < 0) {
+    alert("Masukkan total harga!");
+    return;
+}
 
-    router.put(`/admin/orders/${order.id}`, {
-        status_pesanan: order.orderStatus,
-        status_pembayaran: order.paymentStatus,
-        berat: order.weight,
-        harga_per_kg: order.pricePerKg,
-    });
+router.put(`/admin/orders/${order.id}`, {
+    status: order.orderStatus,
+    status_pembayaran: order.paymentStatus,
+    total: order.total,
+});
+
+
 };
 
-const deleteOrder = (id: any) => {
+const deleteOrder = (id: number) => {
     if (confirm('Yakin ingin menghapus order ini?')) {
         router.delete(`/admin/orders/${id}`);
     }
 };
 
-const isRefreshing = ref(false);
-
+// ------------------------------------------------
+// REFRESH FROM DATABASE (PENTING)
+// ------------------------------------------------
 const refreshOrders = async () => {
-    isRefreshing.value = true;
-    await new Promise((r) => setTimeout(r, 1000)); // simulasi loading 1 detik
+    try {
+        isRefreshing.value = true;
 
-    // Reset atau ambil ulang data orders
-    orders.value = [
-        {
-            id: 1,
-            customer: 'Siti Aisyah',
-            service: 'Cuci Kiloan Reguler',
-            address: 'Jl. Merpati No. 21, Bandung',
-            pickupDate: 'Selasa, 23 Desember 2025',
-            pricePerKg: 7000,
-            weight: 0,
-            paymentStatus: 'Pending',
-            orderStatus: 'Menunggu Penjemputan',
-            date: '19 Desember 2025 | 11:00 WIB',
-            orderDate: '18 Desember 2025',
-            returnDate: '24 Desember 2025',
-            deliveryMethod: 'Diantar',
-        },
-        {
-            id: 2,
-            customer: 'Rizky Putra',
-            service: 'Cuci Express',
-            address: 'Jl. Cendrawasih No. 10, Cimahi',
-            pickupDate: 'Rabu, 24 Desember 2025',
-            pricePerKg: 9000,
-            weight: 0,
-            paymentStatus: 'Verified',
-            orderStatus: 'Sedang Diproses',
-            date: '20 Desember 2025 | 09:30 WIB',
-            orderDate: '19 Desember 2025',
-            returnDate: '25 Desember 2025',
-            deliveryMethod: 'Ambil Sendiri',
-        },
-    ];
+        const response = await axios.get('/admin/orders/data');
 
-    alert('✅ Data order berhasil diperbarui!');
-    isRefreshing.value = false;
+        if (response.data && response.data.orders) {
+            orders.value = response.data.orders;
+        }
+
+    } catch (error) {
+        console.error('❌ Gagal mengambil data terbaru:', error);
+        alert('Gagal memuat data terbaru dari server.');
+    } finally {
+        isRefreshing.value = false;
+    }
 };
 
+// ------------------------------------------------
+// STATUS STYLE HELPERS
+// ------------------------------------------------
 const statusClass = (status: string) => {
     switch (status) {
         case 'Menunggu Penjemputan':
@@ -454,40 +419,31 @@ const statusClass = (status: string) => {
 
 const statusDotClass = (status: string) => {
     switch (status) {
-        case 'Menunggu Penjemputan':
-            return 'bg-yellow-400';
-        case 'Sedang Diproses':
-            return 'bg-blue-400';
-        case 'Selesai Diproses':
-            return 'bg-pink-400';
+        case 'Menunggu Penjemputan': return 'bg-yellow-400';
+        case 'Sedang Diproses': return 'bg-blue-400';
+        case 'Selesai Diproses': return 'bg-pink-400';
         case 'Siap Diambil':
-        case 'Siap Diantar':
-            return 'bg-green-400';
-        case 'Batal':
-            return 'bg-red-400';
-        default:
-            return 'bg-gray-400';
+        case 'Siap Diantar': return 'bg-green-400';
+        case 'Batal': return 'bg-red-400';
+        default: return 'bg-gray-400';
     }
 };
 
 const statusTextClass = (status: string) => {
     switch (status) {
-        case 'Menunggu Penjemputan':
-            return 'text-yellow-700';
-        case 'Sedang Diproses':
-            return 'text-blue-700';
-        case 'Selesai Diproses':
-            return 'text-pink-700';
+        case 'Menunggu Penjemputan': return 'text-yellow-700';
+        case 'Sedang Diproses': return 'text-blue-700';
+        case 'Selesai Diproses': return 'text-pink-700';
         case 'Siap Diambil':
-        case 'Siap Diantar':
-            return 'text-green-700';
-        case 'Batal':
-            return 'text-red-700';
-        default:
-            return 'text-gray-700';
+        case 'Siap Diantar': return 'text-green-700';
+        case 'Batal': return 'text-red-700';
+        default: return 'text-gray-700';
     }
 };
 
+// ------------------------------------------------
+// FORMAT TANGGAL
+// ------------------------------------------------
 const fmt = (isoOrString: unknown) => {
     if (typeof isoOrString !== 'string' && !(isoOrString instanceof Date)) {
         return isoOrString;
@@ -496,9 +452,7 @@ const fmt = (isoOrString: unknown) => {
     try {
         let d = new Date(isoOrString);
 
-        // ⚡ Tambahkan fallback jika format tanggal bukan ISO lengkap
         if (isNaN(d.getTime()) && typeof isoOrString === 'string') {
-            // tambahkan "T00:00:00" agar bisa diparse oleh Date()
             d = new Date(`${isoOrString}T00:00:00`);
         }
 
@@ -514,10 +468,20 @@ const fmt = (isoOrString: unknown) => {
     }
 };
 
+const statusOptions = [
+    'Menunggu Penjemputan',
+    'Sedang Diproses',
+    'Selesai Diproses',
+    'Siap Diambil',
+    'Siap Diantar',
+    'Batal',
+];
+
 const clearSearch = () => {
     searchQuery.value = '';
 };
 </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
