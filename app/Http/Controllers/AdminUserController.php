@@ -22,11 +22,7 @@ class AdminUserController extends Controller
                 'alamat_lengkap' => $user->alamat_lengkap,
                 'created_at'     => $user->created_at,
                 'updated_at'     => $user->updated_at,
-<<<<<<< HEAD
-                'status'         => $user->isOnline() ? 'Online' : 'Offline',
-=======
                 'status'         => $user->status,
->>>>>>> bdb195f75d5f9ae047eb171293ab64aaa5c52af1
                 'last_activity'  => $user->last_activity,
             ];
         });

@@ -32,9 +32,6 @@ class Kernel extends HttpKernel
         'auth' => \App\Http\Middleware\Authenticate::class,
         'role' => \App\Http\Middleware\RoleMiddleware::class,
         'appearance' => \App\Http\Middleware\HandleAppearance::class,
-<<<<<<< HEAD
 
-=======
->>>>>>> bdb195f75d5f9ae047eb171293ab64aaa5c52af1
     ];
 }
