@@ -66,15 +66,21 @@ class AdminOrderController extends Controller
         $order = Reservasi::findOrFail($id);
 
         $validated = $request->validate([
-            'status' => 'required|string',
+            'status_pesanan' => 'required|string',
             'status_pembayaran' => 'required|string',
             'berat' => 'nullable|numeric|min:0',
             'harga_per_kg' => 'nullable|integer|min:0',
         ]);
 
-        $validated['total'] = $validated['berat'] * $validated['harga_per_kg'];
+        $updateData = [
+            'status' => $validated['status_pesanan'],
+            'payment_status' => $validated['status_pembayaran'],
+            'berat' => $validated['berat'],
+            'harga_per_kg' => $validated['harga_per_kg'],
+            'total' => ($validated['berat'] ?? 0) * ($validated['harga_per_kg'] ?? 0),
+        ];
 
-        $order->update($validated);
+        $order->update($updateData);
 
         return back()->with('success', 'Order berhasil diperbarui.');
     }

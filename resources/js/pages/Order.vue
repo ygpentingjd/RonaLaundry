@@ -5,48 +5,12 @@ import Footer from '../components/Footer.vue';
 import Navbar from '../components/Navbar.vue';
 
 // 🔹 Data dummy bertema laundry
-const orders = ref([
-    {
-        id: 1,
-        tanggal: '2025-10-20',
-        barang: 'Cuci Kering Pakaian',
-        jumlah: 5,
-        status: 'Selesai',
-        harga: 'Rp 25.000',
-    },
-    {
-        id: 2,
-        tanggal: '2025-10-22',
-        barang: 'Setrika Baju',
-        jumlah: 10,
-        status: 'Diproses',
-        harga: 'Rp 15.000',
-    },
-    {
-        id: 3,
-        tanggal: '2025-10-24',
-        barang: 'Cuci Sepatu',
-        jumlah: 2,
-        status: 'Dikirim',
-        harga: 'Rp 30.000',
-    },
-    {
-        id: 4,
-        tanggal: '2025-10-25',
-        barang: 'Cuci Karpet Besar',
-        jumlah: 1,
-        status: 'Selesai',
-        harga: 'Rp 50.000',
-    },
-    {
-        id: 5,
-        tanggal: '2025-10-27',
-        barang: 'Laundry Bed Cover',
-        jumlah: 2,
-        status: 'Diproses',
-        harga: 'Rp 40.000',
-    },
-]);
+const props = defineProps<{
+    orders: any[];
+}>();
+
+// 🔹 Gunakan data dari props
+const orders = ref(props.orders || []);
 
 function goBack() {
     router.visit('/landing'); // arahkan sesuai halaman utama kamu

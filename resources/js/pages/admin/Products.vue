@@ -14,7 +14,7 @@
     <div v-if="loading" class="py-12 text-center text-gray-500">Memuat produk...</div>
 
     <div v-else>
-      <div v-for="(product, index) in products" :key="product.id"
+      <div v-for="(product, index) in productList" :key="product.id"
         class="mb-4 overflow-hidden bg-white border border-gray-200 shadow-md rounded-2xl">
         <div class="flex items-center justify-between p-4 transition cursor-pointer hover:bg-pink-50"
           @click="toggleDetail(index)">
@@ -203,13 +203,27 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { Head } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
 import AdminPanel from '../AdminPanel.vue'
 import axios from 'axios'
 
+interface ProductRaw {
+  id: number;
+  nama_barang: string;
+  satuan: string;
+  estimasi_waktu: string;
+  harga_reguler: number;
+  harga_kilat: number;
+  deskripsi: string;
+  image: string;
+}
+
+const props = defineProps<{
+  products: ProductRaw[]
+}>()
+
 // state
-const products = ref<any[]>([]);
-const loading = ref(true);
+const loading = ref(false);
 const activeIndex = ref<number | null>(null);
 const showForm = ref(false);
 const editMode = ref(false);
@@ -231,9 +245,9 @@ const form = ref<any>({
 });
 
 // mapping helper
-function mapProductFromApi(item: any) {
+function mapProductFromApi(item: ProductRaw) {
   return {
-    id: item.id_product,
+    id: item.id,
     name: item.nama_barang,
     unit: item.satuan,
     estimate: item.estimasi_waktu,
@@ -245,21 +259,14 @@ function mapProductFromApi(item: any) {
   };
 }
 
-async function loadProducts() {
-  loading.value = true;
-  try {
-    const res = await axios.get('/products');
-    products.value = res.data.map((p: any) => mapProductFromApi(p));
-  } catch (e) {
-    console.error('Failed to load products', e);
-    alert('Gagal memuat produk. Cek console.');
-  } finally {
-    loading.value = false;
-  }
-}
+// Use computed or watch to map props.products if needed, or just use it directly if structure matches
+// For now, let's map it on mount or watch
+const productList = ref<any[]>([]);
 
 onMounted(() => {
-  loadProducts();
+  if (props.products) {
+    productList.value = props.products.map((p: ProductRaw) => mapProductFromApi(p));
+  }
 });
 
 function toggleDetail(index: number) {
@@ -371,7 +378,10 @@ async function submitForm() {
     }
 
     closeForm();
-    await loadProducts();
+    router.reload({ only: ['products'] }); // Reload props
+    // Manually update local state if needed, or rely on prop update
+    // For simplicity, we can just reload the whole page or use router.visit if props don't update automatically deeply
+    window.location.reload(); 
   } catch (e: any) {
     console.error(e);
     alert(e?.response?.data?.message || 'Terjadi kesalahan saat menyimpan produk.');
@@ -393,7 +403,7 @@ async function saveChanges(product: any) {
   try {
     await axios.post(`/products/${product.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
     alert('Perubahan disimpan');
-    await loadProducts();
+    window.location.reload();
   } catch (e) {
     console.error(e);
     alert('Gagal menyimpan perubahan');
@@ -409,7 +419,7 @@ async function deleteProduct(id: number) {
   try {
     await axios.delete(`/products/${id}`);
     alert('Produk dihapus');
-    await loadProducts();
+    window.location.reload();
   } catch (e) {
     console.error(e);
     alert('Gagal menghapus produk');

@@ -201,44 +201,14 @@ import UserLayout from '@/layouts/UserLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
+const props = defineProps<{
+    historyOrders: any[];
+}>();
+
 const expandedOrder = ref(null);
 
-// 🔹 Dummy data hanya untuk pesanan selesai
-const orders = ref([
-    {
-        id: 1,
-        customer: 'Siti Aisyah',
-        service: 'Cuci Kiloan Reguler',
-        address: 'Jl. Merpati No. 21, Bandung',
-        pickupDate: 'Selasa, 23 Desember 2025',
-        pricePerKg: 7000,
-        weight: 5,
-        paymentStatus: 'Lunas',
-        status: 'Selesai Diproses',
-        notes: 'Sudah disetrika dan dikemas rapi.',
-        date: '19 Desember 2025 | 11:00 WIB',
-    },
-    {
-        id: 2,
-        customer: 'Rizky Putra',
-        service: 'Cuci Express',
-        address: 'Jl. Cendrawasih No. 10, Cimahi',
-        pickupDate: 'Rabu, 24 Desember 2025',
-        pricePerKg: 9000,
-        weight: 3,
-        paymentStatus: 'Lunas',
-        status: 'Siap Diambil',
-        notes: 'Dijemput oleh kurir pada pukul 10:00 WIB.',
-        date: '21 Desember 2025 | 10:30 WIB',
-    },
-]);
-
-// 🔹 Filter hanya yang selesai
-const completedOrders = computed(() =>
-    orders.value.filter((o) =>
-        ['Selesai Diproses', 'Siap Diambil', 'Siap Diantar'].includes(o.status),
-    ),
-);
+// 🔹 Gunakan data dari props
+const completedOrders = computed(() => props.historyOrders || []);
 
 // 🔹 Toggle detail
 const toggleDetail = (id: any) => {

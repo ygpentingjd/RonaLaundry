@@ -22,6 +22,13 @@ class ReservasiController extends Controller
         ]);
     }
 
+    public function create()
+    {
+        return Inertia::render('Reservasi', [
+            'user' => Auth::user()
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

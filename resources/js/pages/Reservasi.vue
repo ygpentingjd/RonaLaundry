@@ -5,11 +5,19 @@ import Hero from '../components/Hero1.vue'
 import { ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 
-const nama = ref('')
-const whatsapp = ref('')
+const props = defineProps<{
+    user?: {
+        nama_lengkap?: string;
+        nomor_telepon?: string;
+        alamat_lengkap?: string;
+    }
+}>();
+
+const nama = ref(props.user?.nama_lengkap || '')
+const whatsapp = ref(props.user?.nomor_telepon || '')
 const layanan = ref('')
 const barang = ref<string[]>([])
-const alamat = ref('')
+const alamat = ref(props.user?.alamat_lengkap || '')
 const pembayaran = ref('')
 const metode_pengantaran = ref('')
 const tanggal = ref(new Date().toISOString().split('T')[0])

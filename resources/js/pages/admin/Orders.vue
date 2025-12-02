@@ -313,19 +313,48 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3'
 import { Head } from '@inertiajs/vue3'
-import { computed, ref } from 'vue'
-import axios from 'axios'
+import { computed, ref, onMounted } from 'vue'
 import AdminPanel from '../AdminPanel.vue'
+
+// ------------------------------------------------
+// TYPES
+// ------------------------------------------------
+interface Order {
+    id: number;
+    customer: string;
+    address: string;
+    service: string;
+    stuff: string;
+    message: string;
+    orderStatus: string;
+    paymentStatus: string;
+    pricePerKg: number;
+    weight: number;
+    orderDate: string;
+    returnDate: string;
+    deliveryMethod: string;
+    date: string;
+    paymentMethod?: string;
+    pickupDate?: string;
+    massage?: string;
+    total?: number;
+}
 
 // ------------------------------------------------
 // PROPS & STATE
 // ------------------------------------------------
 const props = defineProps<{
-    orders: Array<AdminOrder>;
+    orders: Order[];
 }>();
 
 // orders utama yang akan berubah ketika refresh
-const orders = ref(props.orders || []);
+const orderList = ref<Order[]>([]);
+
+onMounted(() => {
+    if (props.orders) {
+        orderList.value = props.orders;
+    }
+});
 
 // UI states
 const expandedOrder = ref<number | null>(null);
@@ -338,9 +367,9 @@ const isRefreshing = ref(false);
 // ------------------------------------------------
 const filteredOrders = computed(() => {
     const q = searchQuery.value.trim().toLowerCase();
-    if (!q) return orders.value;
+    if (!q) return orderList.value;
 
-    return orders.value.filter((order: any) => {
+    return orderList.value.filter((order: Order) => {
         const fields = [
             String(order.id),
             order.customer,
@@ -376,7 +405,7 @@ const toggleDropdown = (id: number) => {
     openDropdown.value = openDropdown.value === id ? null : id;
 };
 
-const selectStatus = (order: any, status: string) => {
+const selectStatus = (order: Order, status: string) => {
     order.orderStatus = status;
     openDropdown.value = null;
 };
@@ -384,7 +413,7 @@ const selectStatus = (order: any, status: string) => {
 // ------------------------------------------------
 // UPDATE & DELETE
 // ------------------------------------------------
-const updateOrder = (order: any) => {
+const updateOrder = (order: Order) => {
     if (!order.weight || order.weight <= 0) {
         alert('Masukkan berat laundry terlebih dahulu!');
         return;
@@ -395,34 +424,43 @@ const updateOrder = (order: any) => {
         status_pembayaran: order.paymentStatus,
         berat: order.weight,
         harga_per_kg: order.pricePerKg,
+    }, {
+        onSuccess: () => {
+            alert('Order berhasil diperbarui');
+            router.reload({ only: ['orders'] });
+        },
+        onError: (errors) => {
+            console.error(errors);
+            alert('Gagal memperbarui order');
+        }
     });
 };
 
 const deleteOrder = (id: number) => {
     if (confirm('Yakin ingin menghapus order ini?')) {
-        router.delete(`/admin/orders/${id}`);
+        router.delete(`/admin/orders/${id}`, {
+            onSuccess: () => {
+                alert('Order berhasil dihapus');
+                router.reload({ only: ['orders'] });
+            }
+        });
     }
 };
 
 // ------------------------------------------------
 // REFRESH FROM DATABASE (PENTING)
 // ------------------------------------------------
-const refreshOrders = async () => {
-    try {
-        isRefreshing.value = true;
-
-        const response = await axios.get('/admin/orders/data');
-
-        if (response.data && response.data.orders) {
-            orders.value = response.data.orders;
+const refreshOrders = () => {
+    isRefreshing.value = true;
+    router.reload({
+        only: ['orders'],
+        onFinish: () => {
+            isRefreshing.value = false;
+            // Update local ref if needed, but props should update automatically
+            // If we want to be sure:
+            if (props.orders) orderList.value = props.orders;
         }
-
-    } catch (error) {
-        console.error('❌ Gagal mengambil data terbaru:', error);
-        alert('Gagal memuat data terbaru dari server.');
-    } finally {
-        isRefreshing.value = false;
-    }
+    });
 };
 
 // ------------------------------------------------

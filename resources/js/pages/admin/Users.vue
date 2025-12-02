@@ -68,7 +68,7 @@
                         </td>
                         <td
                             :class="
-                                user.status === 'Online'
+                                user.status === 'Active'
                                     ? 'text-green-600'
                                     : 'text-red-600'
                             "
@@ -173,10 +173,10 @@
 </template>
 
 <script setup lang="ts">
-import { usePage } from '@inertiajs/vue3'
+import { router } from '@inertiajs/vue3'
 import axios from 'axios'
 import { Head } from '@inertiajs/vue3'
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import AdminPanel from '../AdminPanel.vue'
 
 // --- tipe untuk data mentah dari server (snake_case) ---
@@ -206,29 +206,26 @@ interface UserView {
   updatedAt?: string | null;
 }
 
-interface AdminUsersPageProps {
-  users?: UserRaw[];
-  [key: string]: any;
-}
-
-// --- penting: deklarasikan page dulu
-const page = usePage<AdminUsersPageProps>();
-const props = page.props.value ?? {};
+const props = defineProps<{ users: UserRaw[] }>();
 
 // --- inisialisasi users sebagai ref (bisa di-push/splice/filter) ---
-const users = ref<UserView[]>(
-  (props.users ?? []).map((u: UserRaw) => ({
-    id: u.id_user!,
-    username: u.username,
-    email: u.email,
-    role: u.role ?? 'User',
-    nomor_telepon: u.nomor_telepon ?? '',
-    alamat_lengkap: u.alamat_lengkap ?? '',
-    status: u.status ?? 'Active',
-    createdAt: u.created_at ?? null,
-    updatedAt: u.updated_at ?? null,
-  }))
-);
+const userList = ref<UserView[]>([]);
+
+onMounted(() => {
+    if (props.users) {
+        userList.value = props.users.map((u: UserRaw) => ({
+            id: u.id_user!,
+            username: u.username,
+            email: u.email,
+            role: u.role ?? 'User',
+            nomor_telepon: u.nomor_telepon ?? '',
+            alamat_lengkap: u.alamat_lengkap ?? '',
+            status: u.status ?? 'Active',
+            createdAt: u.created_at ?? null,
+            updatedAt: u.updated_at ?? null,
+        }));
+    }
+});
 
 // form & modal state
 const showForm = ref(false);
@@ -248,11 +245,11 @@ const formUser = ref({
 
 // computed filter
 const filteredUsers = computed(() => {
-  if (!searchQuery.value) return users.value;
+  if (!searchQuery.value) return userList.value;
   const q = searchQuery.value.toLowerCase();
-  return users.value.filter(
-    (u: any) =>
-      (u.id_user + '').includes(q) ||
+  return userList.value.filter(
+    (u: UserView) =>
+      (u.id + '').includes(q) ||
       u.username.toLowerCase().includes(q) ||
       u.email.toLowerCase().includes(q) ||
       (u.alamat_lengkap || '').toLowerCase().includes(q),
@@ -276,7 +273,7 @@ function openForm() {
 
 function editUser(user: any) {
   isEditing.value = true;
-  editingId.value = user.id_user;
+  editingId.value = user.id;
   formUser.value = {
     username: user.username,
     email: user.email,
@@ -299,40 +296,15 @@ async function saveUser() {
     const payload = { ...formUser.value };
 
     if (isEditing.value && editingId.value) {
-      const res = await axios.put(`/admin/users/${editingId.value}`, payload);
-      const updated = res.data.user;
-
-      const idx = users.value.findIndex((u: any) => u.id_user == updated.id_user);
-      if (idx !== -1) {
-        users.value[idx] = {
-          id: updated.id,
-          username: updated.username,
-          email: updated.email,
-          alamat_lengkap: updated.alamat_lengkap,
-          status: updated.status,
-          role: updated.role ?? users.value[idx].role,
-          nomor_telepon: updated.nomor_telepon ?? users.value[idx].nomor_telepon,
-          createdAt: updated.created_at ?? users.value[idx].createdAt,
-          updatedAt: updated.updated_at ?? new Date().toISOString(),
-        };
-      }
+      await axios.put(`/admin/users/${editingId.value}`, payload);
+      alert('User berhasil diperbarui');
     } else {
-      const res = await axios.post('/admin/users', payload);
-      const created = res.data.user;
-      users.value.push({
-        id: created.id,
-        username: created.username,
-        email: created.email,
-        alamat_lengkap: created.alamat_lengkap,
-        status: created.status,
-        role: created.role ?? 'User',
-        nomor_telepon: created.nomor_telepon ?? '',
-        createdAt: created.created_at,
-        updatedAt: created.updated_at,
-      });
+      await axios.post('/admin/users', payload);
+      alert('User berhasil ditambahkan');
     }
 
     showForm.value = false;
+    router.reload({ only: ['users'] });
   } catch (err: any) {
     if (err.response?.status === 422) {
       console.error('Validation errors:', err.response.data.errors);
@@ -350,7 +322,8 @@ async function deleteUser(id: number) {
 
   try {
     await axios.delete(`/admin/users/${id}`);
-    users.value = users.value.filter((u: any) => u.id_user !== id);
+    alert('User berhasil dihapus');
+    router.reload({ only: ['users'] });
   } catch (err) {
     console.error(err);
     alert('Gagal menghapus user.');

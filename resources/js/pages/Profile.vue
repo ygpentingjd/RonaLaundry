@@ -20,15 +20,15 @@
           <div class="grid grid-cols-3 text-center py-6 bg-pink-100 border-t border-b border-pink-200">
             <div>
               <p class="text-sm text-gray-600">Total Transaksi</p>
-              <p class="text-xl font-bold text-pink-600">10x</p>
+              <p class="text-xl font-bold text-pink-600">{{ stats.total_transaksi }}x</p>
             </div>
             <div>
               <p class="text-sm text-gray-600">Status</p>
-              <p class="text-xl font-bold text-pink-600">Langganan</p>
+              <p class="text-xl font-bold text-pink-600">{{ stats.status_pelanggan }}</p>
             </div>
             <div>
               <p class="text-sm text-gray-600">Favorit</p>
-              <p class="text-xl font-bold text-pink-600">Kilat</p>
+              <p class="text-xl font-bold text-pink-600">{{ stats.layanan_favorit }}</p>
             </div>
           </div>
 
@@ -115,11 +115,12 @@
           <!-- 🔹 Riwayat -->
           <div class="p-8 bg-white border-t border-pink-100">
             <h3 class="text-lg font-semibold text-gray-800 mb-3">Riwayat Terakhir</h3>
-            <p class="text-gray-700">
-              Laundry 5kg -
-              <span class="text-pink-600 font-semibold">Kilat</span>
-              (selesai <b>2 jam yang lalu</b>)
+            <p v-if="lastOrder" class="text-gray-700">
+              Laundry {{ lastOrder.berat ? lastOrder.berat + 'kg' : '-' }} -
+              <span class="text-pink-600 font-semibold">{{ lastOrder.layanan }}</span>
+              (dibuat <b>{{ lastOrder.time_ago }}</b>)
             </p>
+            <p v-else class="text-gray-500 italic">Belum ada riwayat transaksi.</p>
           </div>
 
           <!-- 🔹 Tombol -->
@@ -146,11 +147,24 @@
 
 <script setup lang="ts">
 import UserLayout from "@/layouts/UserLayout.vue";
-import { Head, usePage, router } from "@inertiajs/vue3";
+import { Head, router } from "@inertiajs/vue3";
 import { ref } from "vue";
 
-const page = usePage();
-const user = page.props.user || {
+const props = defineProps<{
+  user: any;
+  stats: {
+    total_transaksi: number;
+    status_pelanggan: string;
+    layanan_favorit: string;
+  };
+  lastOrder: {
+    layanan: string;
+    berat: number;
+    time_ago: string;
+  } | null;
+}>();
+
+const user = props.user || {
   username: "Pengguna",
   email: "email@contoh.com",
 };

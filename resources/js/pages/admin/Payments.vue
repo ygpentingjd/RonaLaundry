@@ -151,52 +151,23 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue"
-import { Head } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
 import AdminPanel from "../AdminPanel.vue"
 
-// 🔹 Data dummy
-const payments = ref([
-  {
-    id: 1,
-    orderId: "ORD001",
-    userName: "Siti",
-    method: "QRIS",
-    total: 50000,
-    status: "Pending",
-    date: "2025-11-04",
-    proof: "/images/sample-proof.jpg",
-  },
-  {
-    id: 2,
-    orderId: "ORD002",
-    userName: "Budi",
-    method: "BNI",
-    total: 85000,
-    status: "Verified",
-    date: "2025-11-03",
-    proof: "/images/sample-proof.jpg",
-  },
-  {
-    id: 3,
-    orderId: "ORD003",
-    userName: "Andi",
-    method: "COD",
-    total: 70000,
-    status: "Rejected",
-    date: "2025-11-02",
-    proof: "/images/sample-proof.jpg",
-  },
-  {
-    id: 4,
-    orderId: "ORD004",
-    userName: "Dewi",
-    method: "BSI",
-    total: 60000,
-    status: "Pending",
-    date: "2025-11-04",
-    proof: "/images/sample-proof.jpg",
-  },
-]);
+interface Payment {
+  id: number;
+  orderId: string;
+  userName: string;
+  method: string;
+  total: number;
+  status: string;
+  date: string;
+  proof?: string;
+}
+
+const props = defineProps<{
+  payments: Payment[]
+}>()
 
 // 🔹 State
 const filterStatus = ref("All");
@@ -205,8 +176,8 @@ const isRefreshing = ref(false);
 
 // 🔹 Filtered Data
 const filteredPayments = computed(() => {
-  if (filterStatus.value === "All") return payments.value;
-  return payments.value.filter((p) => p.status === filterStatus.value);
+  if (filterStatus.value === "All") return props.payments;
+  return props.payments.filter((p: Payment) => p.status === filterStatus.value);
 });
 
 // 🔹 Actions
@@ -215,17 +186,25 @@ const viewDetails = (payment: any) => {
 };
 
 const verifyPayment = (id: any) => {
-  const payment = payments.value.find((p) => p.id === id);
-  if (payment) payment.status = "Verified";
-  selectedPayment.value = null;
-  alert("✅ Payment verified successfully!");
+  if (confirm('Are you sure you want to verify this payment?')) {
+    router.post(route('admin.payments.verify', id), {}, {
+      onSuccess: () => {
+        selectedPayment.value = null;
+        // alert("✅ Payment verified successfully!"); // Optional, flash message handles it
+      }
+    });
+  }
 };
 
 const rejectPayment = (id: any) => {
-  const payment = payments.value.find((p) => p.id === id);
-  if (payment) payment.status = "Rejected";
-  selectedPayment.value = null;
-  alert("❌ Payment rejected.");
+  if (confirm('Are you sure you want to reject this payment?')) {
+    router.post(route('admin.payments.reject', id), {}, {
+      onSuccess: () => {
+        selectedPayment.value = null;
+        // alert("❌ Payment rejected.");
+      }
+    });
+  }
 };
 
 const closeModal = () => {
@@ -233,19 +212,12 @@ const closeModal = () => {
 };
 
 // 🔹 Refresh Button Animation
-const refreshData = async () => {
-  try {
-    isRefreshing.value = true;
-    // Simulasi delay (misal fetch API)
-    await new Promise((r) => setTimeout(r, 1000));
-
-    alert("✅ Payment data refreshed!");
-  } catch (err) {
-    console.error("Refresh failed:", err);
-    alert("❌ Failed to refresh data.");
-  } finally {
-    isRefreshing.value = false;
-  }
+const refreshData = () => {
+  isRefreshing.value = true;
+  router.reload({
+    only: ['payments'],
+    onFinish: () => isRefreshing.value = false
+  });
 };
 </script>
 

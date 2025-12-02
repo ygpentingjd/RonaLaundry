@@ -14,6 +14,13 @@ class ProductController extends Controller
         return response()->json(Product::all());
     }
 
+    public function adminIndex()
+    {
+        return \Inertia\Inertia::render('admin/Products', [
+            'products' => Product::all()
+        ]);
+    }
+
     // STORE DATA
     public function store(Request $request)
     {
