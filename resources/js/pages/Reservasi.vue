@@ -5,15 +5,24 @@ import Hero from '../components/Hero1.vue'
 import { ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 
-const nama = ref('')
-const whatsapp = ref('')
+const props = defineProps<{
+    user?: {
+        nama_lengkap?: string;
+        nomor_telepon?: string;
+        alamat_lengkap?: string;
+    }
+}>();
+
+const nama = ref(props.user?.nama_lengkap || '')
+const whatsapp = ref(props.user?.nomor_telepon || '')
 const layanan = ref('')
 const barang = ref<string[]>([])
-const alamat = ref('')
+const alamat = ref(props.user?.alamat_lengkap || '')
 const pembayaran = ref('')
 const metode_pengantaran = ref('')
 const tanggal = ref(new Date().toISOString().split('T')[0])
 const tanggal_kembali = ref('')
+const pesan = ref('')
 
 const barangOptions = ['Selimut', 'Boneka', 'Karpet', 'Sepatu', 'Alat Ibadah', 'Handuk']
 
@@ -35,7 +44,8 @@ const submitForm = () => {
     pembayaran: pembayaran.value,
     metode_pengantaran: metode_pengantaran.value,
     tanggal: tanggal.value,
-    tanggal_kembali: tanggal_kembali.value
+    tanggal_kembali: tanggal_kembali.value,
+    pesan: pesan.value
   }, {
     onSuccess: () => {
       alert('Pesanan berhasil disimpan! 😊')
@@ -49,6 +59,7 @@ const submitForm = () => {
       metode_pengantaran.value = ''
       tanggal.value = ''
       tanggal_kembali.value = ''
+      pesan.value = ''
     },
     onError: (errors) => {
       console.error(errors)
@@ -225,6 +236,15 @@ const submitForm = () => {
             />
           </div>
 
+          <div>
+            <label class="block mb-1 font-medium text-black-800">
+              Pesan Khusus (Optional)
+            </label>
+            <textarea v-model="pesan" rows="3"
+              placeholder="Contoh: Cuciannya sudah saya taruh di depan pintu, nanti tolong diambil ya. Terima kasih 😊"
+              class="w-full p-3 transition bg-white border border-pink-200 rounded-lg shadow-sm outline-none resize-none focus:ring-2 focus:ring-pink-400 focus:border-pink-400"></textarea>
+          </div>
+
           <!-- Tombol Submit -->
           <div class="flex justify-center mt-8">
             <button
@@ -252,6 +272,7 @@ const submitForm = () => {
             <li><strong>Pengantaran:</strong> {{ metode_pengantaran }}</li>
             <li><strong>Tanggal Masuk:</strong> {{ tanggal }}</li>
             <li><strong>Tanggal Pengambilan:</strong> {{ tanggal_kembali }}</li>
+            <li><strong>Pesan Tambahan:</strong> {{ pesan }}</li>
           </ul>
         </div>
       </div>

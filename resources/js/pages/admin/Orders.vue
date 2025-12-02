@@ -1,8 +1,8 @@
 <template>
     <AdminPanel>
+        <Head title="Orders Management - RonaLaundry" />
         <!-- Header -->
-        <!-- HEADER -->
-        <div class="flex items-center justify-between mb-8">
+        <div class="mb-8 flex items-center justify-between">
             <h1 class="text-3xl font-semibold text-pink-700">
                 Orders Management
             </h1>
@@ -13,7 +13,7 @@
                     v-model="searchQuery"
                     type="text"
                     placeholder="Cari order..."
-                    class="w-64 px-4 py-2 text-gray-700 transition bg-white border border-pink-300 rounded-lg shadow-sm focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                    class="w-64 rounded-lg border border-pink-300 bg-white px-4 py-2 text-gray-700 shadow-sm transition focus:ring-2 focus:ring-pink-400 focus:outline-none"
                 />
 
                 <!-- Tombol Clear -->
@@ -29,10 +29,10 @@
                 <button
                     @click="refreshOrders"
                     :disabled="isRefreshing"
-                    class="px-4 py-2 text-white transition bg-pink-500 rounded-lg shadow hover:bg-pink-600 disabled:opacity-50"
+                    class="rounded-lg bg-pink-500 px-4 py-2 text-white shadow transition hover:bg-pink-600 disabled:opacity-50"
                 >
                     <span
-                        class="mr-1 text-sm align-middle material-icons"
+                        class="material-icons mr-1 align-middle text-sm"
                         :class="{ 'animate-spin': isRefreshing }"
                     >
                         refresh
@@ -48,14 +48,14 @@
             <div
                 v-for="order in filteredOrders"
                 :key="order.id"
-                class="p-6 transition duration-200 shadow-md rounded-2xl bg-pink-50"
+                class="rounded-2xl bg-pink-50 p-6 shadow-md transition duration-200"
             >
                 <!-- Header Card -->
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="flex items-center gap-3">
                             <div
-                                class="flex items-center justify-center w-8 h-8 font-semibold text-white bg-pink-400 rounded-full"
+                                class="flex h-8 w-8 items-center justify-center rounded-full bg-pink-400 font-semibold text-white"
                             >
                                 {{ String(order.id).padStart(2, '0') }}
                             </div>
@@ -65,16 +65,16 @@
                             </h3>
                         </div>
                         <div
-                            class="flex items-center gap-1 mt-1 text-sm text-gray-500"
+                            class="mt-1 flex items-center gap-1 text-sm text-gray-500"
                         >
-                            <span class="text-sm material-icons">schedule</span>
+                            <span class="material-icons text-sm">schedule</span>
                             {{ order.date }}
                         </div>
                     </div>
 
                     <button
                         @click="toggleDetail(order.id)"
-                        class="px-4 py-1 text-sm text-white transition bg-pink-400 rounded-lg shadow hover:bg-pink-500"
+                        class="rounded-lg bg-pink-400 px-4 py-1 text-sm text-white shadow transition hover:bg-pink-500"
                     >
                         {{
                             expandedOrder === order.id
@@ -93,7 +93,7 @@
                         <!-- 🔹 Identitas Pemesan -->
                         <div>
                             <p class="mb-2 font-semibold">Identitas Pemesan</p>
-                            <table class="w-full mb-2">
+                            <table class="mb-2 w-full">
                                 <tbody>
                                     <tr>
                                         <td class="py-1">Order ID</td>
@@ -127,7 +127,7 @@
                         <div>
                             <p class="mb-2 font-semibold">Status Pembayaran</p>
                             <span
-                                class="px-3 py-1 text-sm font-medium rounded-full"
+                                class="rounded-full px-3 py-1 text-sm font-medium"
                                 :class="{
                                     'bg-yellow-100 text-yellow-700':
                                         order.paymentStatus === 'Pending',
@@ -149,11 +149,11 @@
                             <div class="relative inline-block text-left">
                                 <button
                                     @click="toggleDropdown(order.id)"
-                                    class="flex items-center justify-between px-3 py-1 text-sm font-medium rounded-full w-52"
+                                    class="flex w-52 items-center justify-between rounded-full px-3 py-1 text-sm font-medium"
                                     :class="statusClass(order.orderStatus)"
                                 >
                                     {{ order.orderStatus }}
-                                    <span class="ml-1 text-xs material-icons"
+                                    <span class="material-icons ml-1 text-xs"
                                         >arrow_drop_down</span
                                     >
                                 </button>
@@ -161,7 +161,7 @@
                                 <transition name="fade">
                                     <div
                                         v-if="openDropdown === order.id"
-                                        class="absolute z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg w-52"
+                                        class="absolute z-50 mt-1 w-52 rounded-lg border border-gray-200 bg-white shadow-lg"
                                     >
                                         <ul class="py-1 text-sm text-gray-700">
                                             <li
@@ -170,10 +170,10 @@
                                                 @click="
                                                     selectStatus(order, status)
                                                 "
-                                                class="flex items-center px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100"
+                                                class="flex cursor-pointer items-center rounded-lg px-3 py-2 hover:bg-gray-100"
                                             >
                                                 <span
-                                                    class="w-3 h-3 mr-2 rounded-full"
+                                                    class="mr-2 h-3 w-3 rounded-full"
                                                     :class="
                                                         statusDotClass(status)
                                                     "
@@ -194,7 +194,7 @@
                         <!-- 🔹 Detail Order -->
                         <div>
                             <p class="mt-4 mb-2 font-semibold">Detail Order</p>
-                            <table class="w-full mb-4">
+                            <table class="mb-4 w-full">
                                 <tbody>
                                     <tr>
                                         <td class="py-1">Layanan</td>
@@ -209,9 +209,17 @@
                                         </td>
                                     </tr>
                                     <tr>
+                                        <td class="py-1">Pesan Tambahan</td>
+                                        <td
+                                            class="py-1 text-right text-gray-600"
+                                        >
+                                            {{ order.message }}
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <td class="py-1">Tanggal Masuk</td>
                                         <td class="py-1 text-right">
-                                            {{ fmt (order.orderDate) }}
+                                            {{ fmt(order.orderDate) }}
                                         </td>
                                     </tr>
                                     <tr>
@@ -219,7 +227,7 @@
                                             Tanggal Pengambilan
                                         </td>
                                         <td class="py-1 text-right">
-                                            {{ fmt (order.returnDate) }}
+                                            {{ fmt(order.returnDate) }}
                                         </td>
                                     </tr>
                                     <tr>
@@ -229,23 +237,30 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                    <td class="py-1">Total Harga</td>
-                                    <td class="py-1 text-right">
-                                        <input 
-                                        v-model.number="order.total"
-                                        type="number"
-                                        min="0"
-                                        placeholder="Isi total"
-                                        class="w-32 px-2 py-1 text-sm text-right border rounded-lg focus:ring-2 focus:ring-pink-300 focus:outline-none"
-                                        />
-                                    </td>
+                                        <td class="py-1">Total Harga</td>
+                                        <td class="py-1 text-right">
+                                            <input
+                                                v-model.number="order.total"
+                                                type="number"
+                                                min="0"
+                                                placeholder="Isi total"
+                                                class="w-32 rounded-lg border px-2 py-1 text-right text-sm focus:ring-2 focus:ring-pink-300 focus:outline-none"
+                                            />
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="pt-3 font-semibold">
                                             Total
                                         </td>
-                                        <td class="pt-3 font-bold text-right text-gray-900">
-                                         Rp {{ order.total ? order.total.toLocaleString() : '—' }}
+                                        <td
+                                            class="pt-3 text-right font-bold text-gray-900"
+                                        >
+                                            Rp
+                                            {{
+                                                order.total
+                                                    ? order.total.toLocaleString()
+                                                    : '—'
+                                            }}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -253,7 +268,7 @@
                         </div>
 
                         <!-- 🔹 Tombol Aksi -->
-                        <div class="flex justify-end gap-3 mt-4">
+                        <div class="mt-4 flex justify-end gap-3">
                             <button
                                 class="text-blue-500 hover:underline"
                                 @click="updateOrder(order)"
@@ -283,35 +298,63 @@
 </template>
 
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
-import axios from 'axios';
+import { Head, router } from '@inertiajs/vue3';
+import { computed, onMounted, ref } from 'vue';
 import AdminPanel from '../AdminPanel.vue';
+
+// ------------------------------------------------
+// TYPES
+// ------------------------------------------------
+interface Order {
+    id: number;
+    customer: string;
+    address: string;
+    service: string;
+    stuff: string;
+    message: string;
+    orderStatus: string;
+    paymentStatus: string;
+    pricePerKg: number;
+    weight: number;
+    orderDate: string;
+    returnDate: string;
+    deliveryMethod: string;
+    date: string;
+    paymentMethod?: string;
+    pickupDate?: string;
+    massage?: string;
+    total?: number;
+}
 
 // ------------------------------------------------
 // PROPS & STATE
 // ------------------------------------------------
 const props = defineProps<{
-    orders: Array<AdminOrder>;
+    orders: Order[];
 }>();
 
 // orders utama yang akan berubah ketika refresh
-const orders = ref(props.orders || []);
+const orderList = ref<Order[]>([]);
+
+onMounted(() => {
+    if (props.orders) {
+        orderList.value = props.orders;
+    }
+});
 
 // UI states
 const expandedOrder = ref<number | null>(null);
 const openDropdown = ref<number | null>(null);
 const searchQuery = ref('');
 const isRefreshing = ref(false);
-
 // ------------------------------------------------
 // SEARCH FILTER
 // ------------------------------------------------
 const filteredOrders = computed(() => {
     const q = searchQuery.value.trim().toLowerCase();
-    if (!q) return orders.value;
+    if (!q) return orderList.value;
 
-    return orders.value.filter((order: any) => {
+    return orderList.value.filter((order: Order) => {
         const fields = [
             String(order.id),
             order.customer,
@@ -326,6 +369,7 @@ const filteredOrders = computed(() => {
             order.returnDate,
             order.orderDate,
             order.date,
+            order.massage,
             String(order.pricePerKg),
             String(order.weight),
             String(order.total),
@@ -346,7 +390,7 @@ const toggleDropdown = (id: number) => {
     openDropdown.value = openDropdown.value === id ? null : id;
 };
 
-const selectStatus = (order: any, status: string) => {
+const selectStatus = (order: Order, status: string) => {
     order.orderStatus = status;
     openDropdown.value = null;
 };
@@ -354,46 +398,58 @@ const selectStatus = (order: any, status: string) => {
 // ------------------------------------------------
 // UPDATE & DELETE
 // ------------------------------------------------
-const updateOrder = (order: any) => {
-    if (order.total == null || order.total < 0) {
-    alert("Masukkan total harga!");
-    return;
-}
+const updateOrder = (order: Order) => {
+    if (!order.weight || order.weight <= 0) {
+        alert('Masukkan berat laundry terlebih dahulu!');
+        return;
+    }
 
-router.put(`/admin/orders/${order.id}`, {
-    status: order.orderStatus,
-    status_pembayaran: order.paymentStatus,
-    total: order.total,
-});
-
-
+    router.put(
+        `/admin/orders/${order.id}`,
+        {
+            status_pesanan: order.orderStatus,
+            status_pembayaran: order.paymentStatus,
+            berat: order.weight,
+            harga_per_kg: order.pricePerKg,
+        },
+        {
+            onSuccess: () => {
+                alert('Order berhasil diperbarui');
+                router.reload({ only: ['orders'] });
+            },
+            onError: (errors) => {
+                console.error(errors);
+                alert('Gagal memperbarui order');
+            },
+        },
+    );
 };
 
 const deleteOrder = (id: number) => {
     if (confirm('Yakin ingin menghapus order ini?')) {
-        router.delete(`/admin/orders/${id}`);
+        router.delete(`/admin/orders/${id}`, {
+            onSuccess: () => {
+                alert('Order berhasil dihapus');
+                router.reload({ only: ['orders'] });
+            },
+        });
     }
 };
 
 // ------------------------------------------------
 // REFRESH FROM DATABASE (PENTING)
 // ------------------------------------------------
-const refreshOrders = async () => {
-    try {
-        isRefreshing.value = true;
-
-        const response = await axios.get('/admin/orders/data');
-
-        if (response.data && response.data.orders) {
-            orders.value = response.data.orders;
-        }
-
-    } catch (error) {
-        console.error('❌ Gagal mengambil data terbaru:', error);
-        alert('Gagal memuat data terbaru dari server.');
-    } finally {
-        isRefreshing.value = false;
-    }
+const refreshOrders = () => {
+    isRefreshing.value = true;
+    router.reload({
+        only: ['orders'],
+        onFinish: () => {
+            isRefreshing.value = false;
+            // Update local ref if needed, but props should update automatically
+            // If we want to be sure:
+            if (props.orders) orderList.value = props.orders;
+        },
+    });
 };
 
 // ------------------------------------------------
@@ -419,25 +475,37 @@ const statusClass = (status: string) => {
 
 const statusDotClass = (status: string) => {
     switch (status) {
-        case 'Menunggu Penjemputan': return 'bg-yellow-400';
-        case 'Sedang Diproses': return 'bg-blue-400';
-        case 'Selesai Diproses': return 'bg-pink-400';
+        case 'Menunggu Penjemputan':
+            return 'bg-yellow-400';
+        case 'Sedang Diproses':
+            return 'bg-blue-400';
+        case 'Selesai Diproses':
+            return 'bg-pink-400';
         case 'Siap Diambil':
-        case 'Siap Diantar': return 'bg-green-400';
-        case 'Batal': return 'bg-red-400';
-        default: return 'bg-gray-400';
+        case 'Siap Diantar':
+            return 'bg-green-400';
+        case 'Batal':
+            return 'bg-red-400';
+        default:
+            return 'bg-gray-400';
     }
 };
 
 const statusTextClass = (status: string) => {
     switch (status) {
-        case 'Menunggu Penjemputan': return 'text-yellow-700';
-        case 'Sedang Diproses': return 'text-blue-700';
-        case 'Selesai Diproses': return 'text-pink-700';
+        case 'Menunggu Penjemputan':
+            return 'text-yellow-700';
+        case 'Sedang Diproses':
+            return 'text-blue-700';
+        case 'Selesai Diproses':
+            return 'text-pink-700';
         case 'Siap Diambil':
-        case 'Siap Diantar': return 'text-green-700';
-        case 'Batal': return 'text-red-700';
-        default: return 'text-gray-700';
+        case 'Siap Diantar':
+            return 'text-green-700';
+        case 'Batal':
+            return 'text-red-700';
+        default:
+            return 'text-gray-700';
     }
 };
 
@@ -481,7 +549,6 @@ const clearSearch = () => {
     searchQuery.value = '';
 };
 </script>
-
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');

@@ -10,10 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LaundryHistoryController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminUserController;
-
-// ➕ Tambahkan ini supaya PaymentAdminController ditemukan
-use App\Http\Controllers\Settings\PaymentAdminController;
-
+use App\Http\Controllers\UserOrderController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -34,42 +31,31 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::post('/payment/upload/{id}', [PaymentController::class, 'uploadProof'])
         ->name('payment.upload');
-    Route::get('/landing', fn() => Inertia::render('LandingPage'))->name('landingpage');
-    Route::get('/reservasi', fn() => Inertia::render('Reservasi'))->name('reservasi');
-    Route::get('/order', fn() => Inertia::render('Order'));
 
-    Route::get('/user-profile', function () {
-        return Inertia::render('Profile', [
-            'user' => Auth::user(),
-        ]);
-    })->middleware(['auth']);
+    Route::get('/landing', fn() => Inertia::render('LandingPage'))->name('landingpage');
+    Route::get('/reservasi', [ReservasiController::class, 'create'])->name('reservasi');
+    Route::get('/order', [UserOrderController::class, 'index'])->name('order');
+
+    Route::get('/user-profile', [ProfileController::class, 'index'])->name('profile');
 
     Route::get('/test', fn() => Inertia::render('test'))->name('test');
-    Route::get('/laundryhistory', fn() => Inertia::render('LaundryHistory'))->name('laundryhistory');
+    Route::get('/laundryhistory', [LaundryHistoryController::class, 'index'])->name('laundryhistory');
 
     Route::get('/mylaundry', [ReservasiController::class, 'index'])->name('mylaundry');
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/reservasi/store', [ReservasiController::class, 'store'])->name('reservasi.store');
     Route::post('/reservasi/{id}/cancel', [ReservasiController::class, 'cancel'])->name('reservasi.cancel');
 });
-
-// ADMIN ROUTES
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
-    // Dashboard
-    Route::get('/admin', fn () => Inertia::render('admin/Dashboard'))->name('admin.dashboard');
+    Route::get('/admin', [App\Http\Controllers\AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
-    // Payments Page
-    Route::get('/admin/payments', fn () => Inertia::render('admin/Payments'))->name('admin.payments');
+    Route::get('/admin/payments', [App\Http\Controllers\AdminPaymentController::class, 'index'])->name('admin.payments');
+    Route::post('/admin/payments/{id}/verify', [App\Http\Controllers\AdminPaymentController::class, 'verify'])->name('admin.payments.verify');
+    Route::post('/admin/payments/{id}/reject', [App\Http\Controllers\AdminPaymentController::class, 'reject'])->name('admin.payments.reject');
 
-    // Payments API
-    Route::get('/admin/payments/data', [PaymentAdminController::class, 'getData'])
-        ->name('admin.payments.data');
+    Route::get('/admin/products', [ProductController::class, 'adminIndex'])->name('admin.products');
 
-    Route::post('/admin/payments/update/{id}', [PaymentAdminController::class, 'updateStatus'])
-        ->name('admin.payments.update');
-
-    // Orders
     Route::get('/admin/orders', [AdminOrderController::class, 'index'])->name('admin.orders');
     Route::get('/admin/orders/data', [AdminOrderController::class, 'getData'])->name('admin.orders.data');
     Route::put('/admin/orders/{id}', [AdminOrderController::class, 'update'])->name('admin.orders.update');
@@ -81,7 +67,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/admin/users/{id}', [AdminUserController::class, 'update'])->name('admin.users.update');
     Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
 
-    // Products
+    // Product CRUD
     Route::resource('products', ProductController::class)->except(['create', 'edit']);
 });
 

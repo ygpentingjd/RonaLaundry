@@ -9,12 +9,14 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
-            'username' => 'admin',
-            'email' => 'admin@ronalaundry.com',
-            'password' => bcrypt('admin123'),
-            'nama_lengkap' => 'Administrator',
-            'role' => 'admin',
-        ]);
+        User::firstOrCreate(
+            ['username' => 'admin'],
+            [
+                'email' => 'admin@ronalaundry.com',
+                'password' => bcrypt('admin123'),
+                'nama_lengkap' => 'Administrator',
+                'role' => 'admin',
+            ]
+        );
     }
 }

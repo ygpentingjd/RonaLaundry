@@ -46,6 +46,7 @@ declare global {
         weight: number;
         date: string;
         total: number;
+        message: string;
         created_at?: string;
         updated_at?: string;
     }
@@ -61,6 +62,7 @@ declare global {
         barang: string[];
         harga_per_kg?: number;
         berat?: number;
+        pesan: string;
         total?: number;
         pembayaran: string;
         updated_at: string;

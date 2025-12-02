@@ -1,8 +1,9 @@
 <template>
     <AdminPanel>
+        <Head title="Users Management - RonaLaundry" />
         <!-- Header -->
         <div
-            class="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between"
+            class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
         >
             <h1 class="text-3xl font-semibold text-pink-700">
                 Daftar Pengguna
@@ -14,12 +15,12 @@
                     v-model="searchQuery"
                     type="text"
                     placeholder="Cari user..."
-                    class="w-full px-4 py-2 text-gray-700 transition bg-white border border-pink-300 rounded-lg shadow-sm focus:ring-2 focus:ring-pink-400 focus:outline-none sm:w-64"
+                    class="w-full rounded-lg border border-pink-300 bg-white px-4 py-2 text-gray-700 shadow-sm transition focus:ring-2 focus:ring-pink-400 focus:outline-none sm:w-64"
                 />
 
                 <button
                     @click="openForm"
-                    class="px-5 py-2 text-white transition bg-pink-600 rounded-lg shadow-md hover:bg-pink-700"
+                    class="rounded-lg bg-pink-600 px-5 py-2 text-white shadow-md transition hover:bg-pink-700"
                 >
                     + Tambah User
                 </button>
@@ -28,11 +29,11 @@
 
         <!-- USERS TABLE -->
         <div
-            class="overflow-hidden bg-white border border-gray-200 shadow-lg rounded-2xl"
+            class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg"
         >
-            <table class="w-full text-left border-collapse">
+            <table class="w-full border-collapse text-left">
                 <thead>
-                    <tr class="text-gray-800 bg-pink-100">
+                    <tr class="bg-pink-100 text-gray-800">
                         <th class="px-5 py-3 font-semibold">ID</th>
                         <th class="px-5 py-3 font-semibold">Username</th>
                         <th class="px-5 py-3 font-semibold">Email</th>
@@ -41,7 +42,7 @@
                         <th class="px-5 py-3 font-semibold">Created At</th>
                         <th class="px-5 py-3 font-semibold">Updated At</th>
                         <th class="px-5 py-3 font-semibold">Status</th>
-                        <th class="px-5 py-3 font-semibold text-center">
+                        <th class="px-5 py-3 text-center font-semibold">
                             Actions
                         </th>
                     </tr>
@@ -52,13 +53,15 @@
                     <tr
                         v-for="user in filteredUsers"
                         :key="user.id"
-                        class="text-gray-800 transition border-t even:bg-gray-50 hover:bg-pink-50"
+                        class="border-t text-gray-800 transition even:bg-gray-50 hover:bg-pink-50"
                     >
                         <td class="px-5 py-3">{{ user.id }}</td>
                         <td class="px-5 py-3">{{ user.username }}</td>
                         <td class="px-5 py-3">{{ user.email }}</td>
                         <td class="px-5 py-3">{{ user.role }}</td>
-                        <td class="px-5 py-3">{{ user.alamat_lengkap || '-' }}</td>
+                        <td class="px-5 py-3">
+                            {{ user.alamat_lengkap || '-' }}
+                        </td>
                         <td class="px-5 py-3 text-sm text-gray-500">
                             {{ formatDate(user.createdAt) }}
                         </td>
@@ -67,14 +70,14 @@
                         </td>
                         <td
                             :class="
-                                user.status === 'Online'
+                                user.status === 'Active'
                                     ? 'text-green-600'
                                     : 'text-red-600'
                             "
                         >
                             {{ user.status }}
                         </td>
-                        <td class="px-5 py-3 space-x-3 text-center">
+                        <td class="space-x-3 px-5 py-3 text-center">
                             <button
                                 @click="editUser(user)"
                                 class="text-blue-600 hover:underline"
@@ -110,12 +113,12 @@
             >
                 <button
                     @click="closeForm"
-                    class="absolute text-lg font-bold text-pink-700 top-3 right-3 hover:text-pink-900"
+                    class="absolute top-3 right-3 text-lg font-bold text-pink-700 hover:text-pink-900"
                 >
                     ✕
                 </button>
 
-                <h2 class="mb-5 text-xl font-bold text-center text-pink-700">
+                <h2 class="mb-5 text-center text-xl font-bold text-pink-700">
                     {{ isEditing ? 'Edit User' : 'Tambah User' }}
                 </h2>
 
@@ -152,16 +155,16 @@
                     </select>
                 </div>
 
-                <div class="flex justify-center gap-4 mt-6">
+                <div class="mt-6 flex justify-center gap-4">
                     <button
                         @click="saveUser"
-                        class="px-6 py-2 text-white bg-green-500 rounded-lg shadow hover:bg-green-600"
+                        class="rounded-lg bg-green-500 px-6 py-2 text-white shadow hover:bg-green-600"
                     >
                         Simpan
                     </button>
                     <button
                         @click="closeForm"
-                        class="px-6 py-2 text-white bg-red-500 rounded-lg shadow hover:bg-red-600"
+                        class="rounded-lg bg-red-500 px-6 py-2 text-white shadow hover:bg-red-600"
                     >
                         Batal
                     </button>
@@ -172,61 +175,58 @@
 </template>
 
 <script setup lang="ts">
-import { usePage } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import axios from 'axios';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import AdminPanel from '../AdminPanel.vue';
 
 // --- tipe untuk data mentah dari server (snake_case) ---
 interface UserRaw {
-  id?: number;
-  id_user?: number;
-  username: string;
-  email: string;
-  alamat_lengkap?: string | null;
-  status?: string;
-  role?: string;
-  nomor_telepon?: string;
-  created_at?: string | null;
-  updated_at?: string | null;
+    id?: number;
+    id_user?: number;
+    username: string;
+    email: string;
+    alamat_lengkap?: string | null;
+    status?: string;
+    role?: string;
+    nomor_telepon?: string;
+    created_at?: string | null;
+    updated_at?: string | null;
 }
 
 // --- tipe untuk view / frontend (camelCase, yang akan kita gunakan di template) ---
 interface UserView {
-  id: number;
-  username: string;
-  email: string;
-  role: string;
-  nomor_telepon: string;
-  alamat_lengkap: string | null;
-  status: string;
-  createdAt?: string | null;
-  updatedAt?: string | null;
+    id: number;
+    username: string;
+    email: string;
+    role: string;
+    nomor_telepon: string;
+    alamat_lengkap: string | null;
+    status: string;
+    createdAt?: string | null;
+    updatedAt?: string | null;
 }
 
-interface AdminUsersPageProps {
-  users?: UserRaw[];
-  [key: string]: any;
-}
-
-// --- penting: deklarasikan page dulu
-const page = usePage<AdminUsersPageProps>();
-const props = page.props.value ?? {};
+const props = defineProps<{ users: UserRaw[] }>();
 
 // --- inisialisasi users sebagai ref (bisa di-push/splice/filter) ---
-const users = ref<UserView[]>(
-  (props.users ?? []).map((u: UserRaw) => ({
-    id: u.id_user!,
-    username: u.username,
-    email: u.email,
-    role: u.role ?? 'User',
-    nomor_telepon: u.nomor_telepon ?? '',
-    alamat_lengkap: u.alamat_lengkap ?? '',
-    status: u.status ?? 'Active',
-    createdAt: u.created_at ?? null,
-    updatedAt: u.updated_at ?? null,
-  }))
-);
+const userList = ref<UserView[]>([]);
+
+onMounted(() => {
+    if (props.users) {
+        userList.value = props.users.map((u: UserRaw) => ({
+            id: u.id_user!,
+            username: u.username,
+            email: u.email,
+            role: u.role ?? 'User',
+            nomor_telepon: u.nomor_telepon ?? '',
+            alamat_lengkap: u.alamat_lengkap ?? '',
+            status: u.status ?? 'Active',
+            createdAt: u.created_at ?? null,
+            updatedAt: u.updated_at ?? null,
+        }));
+    }
+});
 
 // form & modal state
 const showForm = ref(false);
@@ -235,32 +235,6 @@ const editingId = ref<number | null>(null);
 const searchQuery = ref('');
 
 const formUser = ref({
-  username: '',
-  email: '',
-  role: 'User',
-  nomor_telepon: '',
-  alamat_lengkap: '',
-  status: 'Active',
-  password: '',
-});
-
-// computed filter
-const filteredUsers = computed(() => {
-  if (!searchQuery.value) return users.value;
-  const q = searchQuery.value.toLowerCase();
-  return users.value.filter(
-    (u: any) =>
-      (u.id_user + '').includes(q) ||
-      u.username.toLowerCase().includes(q) ||
-      u.email.toLowerCase().includes(q) ||
-      (u.alamat_lengkap || '').toLowerCase().includes(q),
-  );
-});
-
-function openForm() {
-  isEditing.value = false;
-  editingId.value = null;
-  formUser.value = {
     username: '',
     email: '',
     role: 'User',
@@ -268,106 +242,107 @@ function openForm() {
     alamat_lengkap: '',
     status: 'Active',
     password: '',
-  };
-  showForm.value = true;
+});
+
+// computed filter
+const filteredUsers = computed(() => {
+    if (!searchQuery.value) return userList.value;
+    const q = searchQuery.value.toLowerCase();
+    return userList.value.filter(
+        (u: UserView) =>
+            (u.id + '').includes(q) ||
+            u.username.toLowerCase().includes(q) ||
+            u.email.toLowerCase().includes(q) ||
+            (u.alamat_lengkap || '').toLowerCase().includes(q),
+    );
+});
+
+function openForm() {
+    isEditing.value = false;
+    editingId.value = null;
+    formUser.value = {
+        username: '',
+        email: '',
+        role: 'User',
+        nomor_telepon: '',
+        alamat_lengkap: '',
+        status: 'Active',
+        password: '',
+    };
+    showForm.value = true;
 }
 
 function editUser(user: any) {
-  isEditing.value = true;
-  editingId.value = user.id_user;
-  formUser.value = {
-    username: user.username,
-    email: user.email,
-    role: user.role ?? 'User',
-    nomor_telepon: user.nomor_telepon ?? '',
-    alamat_lengkap: user.alamat_lengkap ?? '',
-    status: user.status ?? 'Active',
-    password: '',
-  };
-  showForm.value = true;
+    isEditing.value = true;
+    editingId.value = user.id;
+    formUser.value = {
+        username: user.username,
+        email: user.email,
+        role: user.role ?? 'User',
+        nomor_telepon: user.nomor_telepon ?? '',
+        alamat_lengkap: user.alamat_lengkap ?? '',
+        status: user.status ?? 'Active',
+        password: '',
+    };
+    showForm.value = true;
 }
 
 function closeForm() {
-  showForm.value = false;
+    showForm.value = false;
 }
 
 // Save (create/update)
 async function saveUser() {
-  try {
-    const payload = { ...formUser.value };
+    try {
+        const payload = { ...formUser.value };
 
-    if (isEditing.value && editingId.value) {
-      const res = await axios.put(`/admin/users/${editingId.value}`, payload);
-      const updated = res.data.user;
+        if (isEditing.value && editingId.value) {
+            await axios.put(`/admin/users/${editingId.value}`, payload);
+            alert('User berhasil diperbarui');
+        } else {
+            await axios.post('/admin/users', payload);
+            alert('User berhasil ditambahkan');
+        }
 
-      const idx = users.value.findIndex((u: any) => u.id_user == updated.id_user);
-      if (idx !== -1) {
-        users.value[idx] = {
-          id: updated.id,
-          username: updated.username,
-          email: updated.email,
-          alamat_lengkap: updated.alamat_lengkap,
-          status: updated.status,
-          role: updated.role ?? users.value[idx].role,
-          nomor_telepon: updated.nomor_telepon ?? users.value[idx].nomor_telepon,
-          createdAt: updated.created_at ?? users.value[idx].createdAt,
-          updatedAt: updated.updated_at ?? new Date().toISOString(),
-        };
-      }
-    } else {
-      const res = await axios.post('/admin/users', payload);
-      const created = res.data.user;
-      users.value.push({
-        id: created.id,
-        username: created.username,
-        email: created.email,
-        alamat_lengkap: created.alamat_lengkap,
-        status: created.status,
-        role: created.role ?? 'User',
-        nomor_telepon: created.nomor_telepon ?? '',
-        createdAt: created.created_at,
-        updatedAt: created.updated_at,
-      });
+        showForm.value = false;
+        router.reload({ only: ['users'] });
+    } catch (err: any) {
+        if (err.response?.status === 422) {
+            console.error('Validation errors:', err.response.data.errors);
+            alert('Validasi gagal. Cek input.');
+        } else {
+            console.error(err);
+            alert('Terjadi kesalahan. Lihat console.');
+        }
     }
-
-    showForm.value = false;
-  } catch (err: any) {
-    if (err.response?.status === 422) {
-      console.error('Validation errors:', err.response.data.errors);
-      alert('Validasi gagal. Cek input.');
-    } else {
-      console.error(err);
-      alert('Terjadi kesalahan. Lihat console.');
-    }
-  }
 }
 
 async function deleteUser(id: number) {
-  const ok = confirm('Yakin ingin menghapus user ini?');
-  if (!ok) return;
+    const ok = confirm('Yakin ingin menghapus user ini?');
+    if (!ok) return;
 
-  try {
-    await axios.delete(`/admin/users/${id}`);
-    users.value = users.value.filter((u: any) => u.id_user !== id);
-  } catch (err) {
-    console.error(err);
-    alert('Gagal menghapus user.');
-  }
+    try {
+        await axios.delete(`/admin/users/${id}`);
+        alert('User berhasil dihapus');
+        router.reload({ only: ['users'] });
+    } catch (err) {
+        console.error(err);
+        alert('Gagal menghapus user.');
+    }
 }
 
 function formatDate(date: string | Date | null | undefined) {
-  if (!date) return '-';
-  const d = new Date(date);
-  return d.toLocaleString('id-ID', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+    if (!date) return '-';
+    const d = new Date(date);
+    return d.toLocaleString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
 }
 </script>
-
 
 <style scoped>
 .animate-fadeIn {

@@ -53,9 +53,9 @@ const page = usePage();
 const menus = ref([
   { text: "Beranda", icon: "home", link: "/" },
   { text: "Dashboard", icon: "dashboard", link: "/admin" },
-  { text: "Products", icon: "inventory_2", link: "/admin/products" },
-  { text: "Users", icon: "group", link: "/admin/users" },
-  { text: "Orders", icon: "shopping_cart", link: "/admin/orders" },
+  { text: "Products Management", icon: "inventory_2", link: "/admin/products" },
+  { text: "Users Management", icon: "group", link: "/admin/users" },
+  { text: "Orders Management", icon: "shopping_cart", link: "/admin/orders" },
   { text: "Payment Verification", icon: "payments", link: "/admin/payments" },
 ]);
 

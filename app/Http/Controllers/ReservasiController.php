@@ -49,6 +49,13 @@ class ReservasiController extends Controller
 
 
 
+    public function create()
+    {
+        return Inertia::render('Reservasi', [
+            'user' => Auth::user()
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -61,6 +68,7 @@ class ReservasiController extends Controller
             'metode_pengantaran' => 'required|string',
             'tanggal' => 'required|date',
             'tanggal_kembali' => 'required|date',
+            'pesan' => 'nullable|string',
         ]);
 
         $validated['user_id'] = Auth::id();

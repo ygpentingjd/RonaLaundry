@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->text('alamat');
             $table->string('pembayaran');
             $table->date('tanggal');
+            $table->text('pesan');
             $table->float('berat')->nullable();
             $table->integer('harga_per_kg')->nullable();
             $table->integer('total')->nullable();
