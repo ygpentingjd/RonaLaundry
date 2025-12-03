@@ -23,11 +23,15 @@ class Reservasi extends Model
         'total',
         'status',
         'payment_status',
-        'pesan'
+        'status_pesanan',
+        'status_pembayaran',
+        'pesan',
+        'order_details'
     ];
 
     protected $casts = [
         'barang' => 'array',
+        'order_details' => 'array',
         'tanggal' => 'date',
     ];
 

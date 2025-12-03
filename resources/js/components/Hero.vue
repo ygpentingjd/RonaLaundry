@@ -29,10 +29,10 @@
     <div class="flex items-center justify-center py-24 bg-white">
       <div class="grid max-w-6xl grid-cols-2 px-6 mx-auto sm:grid-cols-3 md:grid-cols-3 gap-x-18 gap-y-12">
         <div
-          v-for="(item, index) in items"
+          v-for="(item, index) in displayItems"
           :key="index"
           class="flex flex-col items-center p-8 transition cursor-pointer rounded-2xl hover:scale-105"
-          :class="item.bg"
+          :class="getBgClass(index)"
           @click="openModal(item)"
         >
           <img :src="item.img" :alt="item.name" class="w-24 mb-4" />
@@ -66,50 +66,75 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const items: Item[] = [
-  {
-    name: 'Selimut',
-    img: '/images/selimut1.png',
-    price: 'Rp 3.000 / pcs',
-    bg: 'bg-pink-200',
-    desc: 'Cuci selimut jadi lebih segar dan lembut, bebas dari debu dan bau apek. Dijamin wangi tahan lama!',
-  },
-  {
-    name: 'Boneka',
-    img: '/images/boneka.png',
-    price: 'Rp 5.000 / pcs',
-    bg: 'bg-blue-200',
-    desc: 'Boneka kesayanganmu dicuci lembut dengan cairan khusus agar tetap halus, bersih, dan wangi seperti baru.',
-  },
-  {
-    name: 'Karpet',
-    img: '/images/karpet.png',
-    price: 'Rp 5.000 / meter',
-    bg: 'bg-pink-200',
-    desc: 'Karpet bersih bebas debu dan noda, dicuci dengan teknik khusus agar tetap awet dan segar.',
-  },
-  {
-    name: 'Sepatu',
-    img: '/images/sepatu.png',
-    price: 'Rp 10.000 / pasang',
-    bg: 'bg-blue-200',
-    desc: 'Perawatan sepatu profesional, bersih luar dalam tanpa merusak bahan. Cocok untuk semua jenis sepatu!',
-  },
-  {
-    name: 'Alat Ibadah',
-    img: '/images/alatIbadah.png',
-    price: 'Rp 3.000 / pcs',
-    bg: 'bg-pink-200',
-    desc: 'Bersihkan mukena, sarung, dan sajadah dengan lembut agar tetap suci, harum, dan nyaman digunakan.',
-  },
-  {
-    name: 'Handuk',
-    img: '/images/handuk.png',
-    price: 'Rp 3.000 / pcs',
-    bg: 'bg-blue-200',
-    desc: 'Handukmu bakal bersih dan wangi segar lagi, tanpa serat kasar! Nyaman dipakai setiap kali mandi.',
-  },
-]
+import { computed } from 'vue'
+
+const props = defineProps<{
+    products?: any[];
+}>();
+
+interface Item {
+    name: string;
+    img: string;
+    price: string;
+    desc: string;
+}
+
+const displayItems = computed(() => {
+    if (props.products && props.products.length > 0) {
+        return props.products.map(p => ({
+            name: p.nama_barang,
+            img: p.image ? `/storage/${p.image}` : '/images/no-image.png', // Fallback image
+            price: `Rp ${Number(p.harga_reguler).toLocaleString()} / ${p.satuan}`,
+            desc: p.deskripsi || 'Layanan terbaik untuk Anda.',
+        }));
+    }
+    // Fallback to static items if no products provided (optional, or return empty)
+    return [
+      {
+        name: 'Selimut',
+        img: '/images/selimut1.png',
+        price: 'Rp 3.000 / pcs',
+        desc: 'Cuci selimut jadi lebih segar dan lembut, bebas dari debu dan bau apek. Dijamin wangi tahan lama!',
+      },
+      {
+        name: 'Boneka',
+        img: '/images/boneka.png',
+        price: 'Rp 5.000 / pcs',
+        desc: 'Boneka kesayanganmu dicuci lembut dengan cairan khusus agar tetap halus, bersih, dan wangi seperti baru.',
+      },
+      {
+        name: 'Karpet',
+        img: '/images/karpet.png',
+        price: 'Rp 5.000 / meter',
+        desc: 'Karpet bersih bebas debu dan noda, dicuci dengan teknik khusus agar tetap awet dan segar.',
+      },
+      {
+        name: 'Sepatu',
+        img: '/images/sepatu.png',
+        price: 'Rp 10.000 / pasang',
+        desc: 'Perawatan sepatu profesional, bersih luar dalam tanpa merusak bahan. Cocok untuk semua jenis sepatu!',
+      },
+      {
+        name: 'Alat Ibadah',
+        img: '/images/alatIbadah.png',
+        price: 'Rp 3.000 / pcs',
+        desc: 'Bersihkan mukena, sarung, dan sajadah dengan lembut agar tetap suci, harum, dan nyaman digunakan.',
+      },
+      {
+        name: 'Handuk',
+        img: '/images/handuk.png',
+        price: 'Rp 3.000 / pcs',
+        desc: 'Handukmu bakal bersih dan wangi segar lagi, tanpa serat kasar! Nyaman dipakai setiap kali mandi.',
+      },
+    ];
+});
+
+const getBgClass = (index: number) => {
+    // Alternating colors like in the original static list
+    // Pink, Blue, Pink, Blue...
+    const colors = ['bg-pink-200', 'bg-blue-200'];
+    return colors[index % colors.length];
+};
 
 const selectedItem = ref<Item | null>(null)
 

@@ -32,7 +32,11 @@ class AdminDashboardController extends Controller
             DB::raw('MONTH(created_at) as month')
         )
         ->whereYear('created_at', date('Y'))
-        ->where('status_pembayaran', 'Lunas') // Assuming 'Lunas' means paid
+        ->where(function ($q) {
+            $q->where('payment_status', 'Lunas')
+              ->orWhere('status_pembayaran', 'Lunas');
+        })
+        ->whereIn('status', ['Selesai', 'Siap Diantar'])
         ->groupBy('month')
         ->pluck('total', 'month')
         ->toArray();

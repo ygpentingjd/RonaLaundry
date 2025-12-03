@@ -30,6 +30,10 @@ const handlePesanSekarang = () => {
     router.visit('/login')
   }
 }
+
+defineProps<{
+    products?: any[];
+}>();
 </script>
 
 <template>
@@ -39,7 +43,7 @@ const handlePesanSekarang = () => {
 
     <main :style="{ marginTop: navbarHeight }" class="flex-grow">
       <!-- Section 1: Hero -->
-      <Hero />
+      <Hero :products="products" />
 
       <!-- Section 2: About -->
       <section
@@ -124,6 +128,7 @@ const handlePesanSekarang = () => {
           </div>
         </div>
       </section>
+
 
       <!-- Section 3: CTA + Testimoni -->
       <section class="py-20 text-center bg-gradient-to-b from-pink-100 to-pink-200">

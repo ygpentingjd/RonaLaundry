@@ -36,8 +36,11 @@ class ReservasiController extends Controller
 
                 // Total harga final dari admin
                 'total' => $r->total,
-                 'barang' => is_array($r->barang) ? $r->barang : [],
+                'items' => $r->order_details, // Pass detailed items
+                'barang' => is_array($r->barang) ? $r->barang : [],
 
+                'tanggal_kembali' => $r->tanggal_kembali,
+                'created_at' => $r->created_at,
                 'updated_at' => $r->updated_at,
             ];
         });
@@ -52,7 +55,8 @@ class ReservasiController extends Controller
     public function create()
     {
         return Inertia::render('Reservasi', [
-            'user' => Auth::user()
+            'user' => Auth::user(),
+            'products' => \App\Models\Product::all()
         ]);
     }
 

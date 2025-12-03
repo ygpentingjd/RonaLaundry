@@ -57,7 +57,7 @@
                             <!-- Gambar -->
                             <div class="flex justify-center md:justify-start">
                                 <img
-                                    :src="`http://localhost:8000/storage/${product.image}`"
+                                    :src="`/storage/${product.image}`"
                                     class="mx-auto mb-6 h-64 w-64 object-contain"
                                     @error="handleImageError"
                                 />
@@ -413,7 +413,7 @@ function mapProductFromApi(item: ProductRaw) {
         description: item.deskripsi,
         image: item.image,
         image_url: item.image
-            ? `/storage/products/${item.image}`
+            ? `/storage/${item.image}`
             : '/images/no-image.png',
     };
 }
@@ -461,7 +461,7 @@ function openEdit(product: any) {
     form.value.deskripsi = product.description;
     form.value.image = product.image;
     previewUrl.value = product.image
-        ? `/storage/products/${product.image}`
+        ? `/storage/${product.image}`
         : null;
 }
 

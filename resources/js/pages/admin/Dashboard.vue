@@ -54,9 +54,9 @@
             <div class="rounded-xl bg-white p-4 shadow-md">
                 <div class="mb-4 flex justify-between">
                     <h3 class="font-semibold text-gray-700">Recent Orders</h3>
-                    <button class="text-pink-500 hover:underline">
+                    <Link href="/admin/orders" class="text-pink-500 hover:underline">
                         View All
-                    </button>
+                    </Link>
                 </div>
                 <table class="w-full text-left text-gray-700">
                     <thead class="bg-pink-100">
@@ -97,9 +97,9 @@
             <div class="rounded-xl bg-white p-4 shadow-md">
                 <div class="mb-4 flex justify-between">
                     <h3 class="font-semibold text-gray-700">Recent Users</h3>
-                    <button class="text-pink-500 hover:underline">
+                    <Link href="/admin/users" class="text-pink-500 hover:underline">
                         View All
-                    </button>
+                    </Link>
                 </div>
                 <table class="w-full text-left text-gray-700">
                     <thead class="bg-pink-100">
@@ -126,7 +126,7 @@
 
 <script setup lang="ts">
 import AdminPanel from '../AdminPanel.vue'
-import { Head } from '@inertiajs/vue3'
+import { Head, Link } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import type { ApexOptions } from 'apexcharts'
 import ApexCharts from 'vue3-apexcharts'
@@ -157,7 +157,7 @@ interface User {
   email: string;
 }
 
-const props = defineProps<{
+defineProps<{
   stats: StatCard[];
   chartSeries: ChartSeries[];
   recentOrders: Order[];
@@ -166,7 +166,7 @@ const props = defineProps<{
 
 const chartOptions = ref<ApexOptions>({
     chart: { type: 'bar', toolbar: { show: false } },
-    colors: ['#ec4899'],
+    colors: ['#ec4899'], //c4899
     plotOptions: { bar: { borderRadius: 6, columnWidth: '45%' } },
     dataLabels: { enabled: false },
     xaxis: {
@@ -186,7 +186,17 @@ const chartOptions = ref<ApexOptions>({
         ],
     },
     yaxis: { labels: { formatter: (val) => `Rp ${val.toLocaleString()}` } },
-    grid: { borderColor: '#f3f4f6' },
+    grid: { borderColor: '#f3f4f6' }, 
+    tooltip: {
+        enabled: true,
+        theme: 'light',
+        style: {
+            fontSize: '12px',
+        },
+        y: {
+            formatter: (val) => `Rp ${val.toLocaleString()}`,
+        },
+    },
 });
 </script>
 
@@ -194,5 +204,11 @@ const chartOptions = ref<ApexOptions>({
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 .material-icons {
     font-size: 20px;
+}
+
+/* 🔹 Force Tooltip Text Black */
+:deep(.apexcharts-tooltip-title),
+:deep(.apexcharts-tooltip-text) {
+    color: #000000 !important;
 }
 </style>

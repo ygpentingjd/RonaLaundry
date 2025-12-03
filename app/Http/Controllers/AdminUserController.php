@@ -23,7 +23,6 @@ class AdminUserController extends Controller
                 'created_at'     => $user->created_at,
                 'updated_at'     => $user->updated_at,
                 'status'         => $user->status,
-                'last_activity'  => $user->last_activity,
             ];
         });
 

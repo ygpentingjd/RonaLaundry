@@ -30,7 +30,7 @@
                             class="mt-1 flex items-center gap-1 text-sm text-gray-500"
                         >
                             <span class="material-icons text-sm">schedule</span>
-                            {{ formatFullDate(order.tanggal) }}
+                            {{ formatFullDate(order.tanggal_kembali) }}
                         </div>
                     </div>
 
@@ -94,7 +94,7 @@
                                     'bg-yellow-100 text-yellow-700':
                                         order.payment_status === 'Pending',
                                     'bg-green-100 text-green-700':
-                                        order.payment_status === 'Verified',
+                                        order.payment_status === 'Lunas',
                                     'bg-red-100 text-red-700':
                                         order.payment_status === 'Rejected',
                                 }"
@@ -165,29 +165,40 @@
                                             {{ order.pesan }}
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <td class="py-1">Harga per Kg</td>
-                                        <td class="py-1 text-right">
-                                            Rp
-                                            {{
-                                                order.harga_per_kg
-                                                    ? order.harga_per_kg.toLocaleString()
-                                                    : '-'
-                                            }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1">Berat Laundry</td>
-                                        <td
-                                            class="py-1 text-right text-gray-600 italic"
-                                        >
-                                            {{
-                                                order.berat
-                                                    ? order.berat + ' kg'
-                                                    : 'Menunggu input admin'
-                                            }}
-                                        </td>
-                                    </tr>
+                                    <!-- 🔹 Dynamic Items -->
+                                    <template v-if="order.items && order.items.length > 0">
+                                        <tr v-for="(item, index) in order.items" :key="index">
+                                            <td class="py-1">{{ item.label }}</td>
+                                            <td class="py-1 text-right">
+                                                {{ item.qty }} x Rp {{ item.price.toLocaleString() }}
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <template v-else>
+                                        <tr>
+                                            <td class="py-1">Harga per Kg</td>
+                                            <td class="py-1 text-right">
+                                                Rp
+                                                {{
+                                                    order.harga_per_kg
+                                                        ? order.harga_per_kg.toLocaleString()
+                                                        : '-'
+                                                }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-1">Berat Laundry</td>
+                                            <td
+                                                class="py-1 text-right text-gray-600 italic"
+                                            >
+                                                {{
+                                                    order.berat
+                                                        ? order.berat + ' kg'
+                                                        : 'Menunggu input admin'
+                                                }}
+                                            </td>
+                                        </tr>
+                                    </template>
                                     <tr>
                                         <td class="pt-3 font-semibold">
                                             Total
@@ -197,15 +208,7 @@
                                         >
                                             Rp
                                             {{
-                                                order.total
-                                                    ? order.total.toLocaleString()
-                                                    : order.berat &&
-                                                        order.harga_per_kg
-                                                      ? (
-                                                            order.berat *
-                                                            order.harga_per_kg
-                                                        ).toLocaleString()
-                                                      : '—'
+                                                (order.total || (order.berat && order.harga_per_kg ? order.berat * order.harga_per_kg : 0)).toLocaleString()
                                             }}
                                         </td>
                                     </tr>
@@ -234,7 +237,7 @@
                             class="mt-4 flex items-center gap-1 text-xs text-gray-500"
                         >
                             <span class="material-icons text-sm">update</span>
-                            {{ formatFullDate(order.updated_at) }}
+                            {{ formatFullDate(order.created_at) }}
                         </div>
                     </div>
                 </transition>
@@ -262,7 +265,8 @@ interface Order {
     tanggal: string;
     nama: string;
     alamat: string;
-    payment_status: 'Pending' | 'Verified' | 'Rejected';
+    pesan?: string;
+    payment_status: 'Pending' | 'Verified' | 'Rejected' | 'Lunas';
     bukti_pembayaran: string | null; // ✅ sekarang tersedia!
     status: string;
     barang: string[];
@@ -271,6 +275,9 @@ interface Order {
     total: number | null;
     pembayaran: string; // metode pembayaran (string)
     updated_at: string;
+    created_at: string;
+    tanggal_kembali: string;
+    items?: { label: string; qty: number; price: number }[];
 }
 
 const { props } = usePage<{ reservasis: Order[] }>();

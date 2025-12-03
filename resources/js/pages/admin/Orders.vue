@@ -82,6 +82,13 @@
                                 : 'Lihat Detail ▼'
                         }}
                     </button>
+                    <button
+                        v-if="order.orderStatus !== 'Selesai'"
+                        @click="markAsDone(order)"
+                        class="rounded-lg bg-pink-400 px-4 py-1 text-sm text-white shadow transition hover:bg-pink-500"
+                    >
+                        Selesai
+                    </button>
                 </div>
 
                 <!-- Detail (Dropdown) -->
@@ -132,7 +139,7 @@
                                     'bg-yellow-100 text-yellow-700':
                                         order.paymentStatus === 'Pending',
                                     'bg-green-100 text-green-700':
-                                        order.paymentStatus === 'Verified',
+                                        order.paymentStatus === 'Lunas',
                                     'bg-red-100 text-red-700':
                                         order.paymentStatus === 'Rejected',
                                 }"
@@ -236,6 +243,26 @@
                                             {{ order.deliveryMethod }}
                                         </td>
                                     </tr>
+                                    <!-- 🔹 Dynamic Input based on Unit -->
+                                    <tr v-for="(item, index) in getOrderItems(order)" :key="index">
+                                        <td class="py-1">
+                                            {{ item.label }}
+                                        </td>
+                                        <td class="py-1 text-right">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <span class="text-xs text-gray-500">
+                                                    (@ {{ formatPrice(item.price) }})
+                                                </span>
+                                                <input
+                                                    v-model.number="item.qty"
+                                                    type="number"
+                                                    min="0"
+                                                    class="w-24 rounded-lg border px-2 py-1 text-right text-sm focus:ring-2 focus:ring-pink-300 focus:outline-none"
+                                                    @input="calculateTotal(order)"
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
                                     <tr>
                                         <td class="py-1">Total Harga</td>
                                         <td class="py-1 text-right">
@@ -243,8 +270,8 @@
                                                 v-model.number="order.total"
                                                 type="number"
                                                 min="0"
-                                                placeholder="Isi total"
-                                                class="w-32 rounded-lg border px-2 py-1 text-right text-sm focus:ring-2 focus:ring-pink-300 focus:outline-none"
+                                                readonly
+                                                class="w-32 rounded-lg border bg-gray-100 px-2 py-1 text-right text-sm focus:outline-none"
                                             />
                                         </td>
                                     </tr>
@@ -314,6 +341,7 @@ interface Order {
     message: string;
     orderStatus: string;
     paymentStatus: string;
+    status_pembayaran: string;
     pricePerKg: number;
     weight: number;
     orderDate: string;
@@ -324,23 +352,109 @@ interface Order {
     pickupDate?: string;
     massage?: string;
     total?: number;
+    // Local state for dynamic items
+    parsedItems?: {
+        name: string;
+        label: string;
+        unit: string;
+        price: number;
+        qty: number;
+    }[];
 }
 
-// ------------------------------------------------
-// PROPS & STATE
-// ------------------------------------------------
+
 const props = defineProps<{
     orders: Order[];
+    products: any[];
 }>();
 
-// orders utama yang akan berubah ketika refresh
+
 const orderList = ref<Order[]>([]);
+
+// Helper to find product
+const findProductByName = (name: string) => {
+    if (!props.products) return null;
+    return props.products.find(p => name.toLowerCase().includes(p.nama_barang.toLowerCase()));
+};
+
+const getOrderItems = (order: Order) => {
+    if (order.parsedItems) return order.parsedItems;
+
+    // Parse stuff string: "Selimut, Boneka" -> ["Selimut", "Boneka"]
+    const items = order.stuff.split(',').map(s => s.trim());
+    
+    order.parsedItems = items.map(itemName => {
+        const product = findProductByName(itemName);
+        const unit = product?.satuan || 'kg';
+        
+        // Determine price based on service (Biasa/Kilat)
+        let price = 0;
+        if (product) {
+            price = order.service.toLowerCase() === 'kilat' 
+                ? Number(product.harga_kilat) 
+                : Number(product.harga_reguler);
+        }
+
+        let label = 'Berat (kg)';
+        if (unit === 'pcs') label = `Jumlah ${itemName} (pcs)`;
+        else if (unit === 'meter') label = `Panjang ${itemName} (m)`;
+        else label = `Berat ${itemName} (kg)`;
+
+        return {
+            name: itemName,
+            label,
+            unit,
+            price,
+            qty: 0 // Default qty
+        };
+    });
+
+    return order.parsedItems;
+};
+
+const calculateTotal = (order: Order) => {
+    if (!order.parsedItems) return;
+    
+    const total = order.parsedItems.reduce((sum, item) => {
+        return sum + (item.qty * item.price);
+    }, 0);
+
+    order.total = total;
+    
+    order.weight = order.parsedItems.reduce((sum, item) => sum + item.qty, 0);
+};
+
+const formatPrice = (price: number) => {
+    return 'Rp ' + price.toLocaleString();
+};
 
 onMounted(() => {
     if (props.orders) {
         orderList.value = props.orders;
     }
 });
+
+const captureState = () => {
+    const map: Record<number, any> = {};
+    orderList.value.forEach(order => {
+        if (order.parsedItems) {
+            map[order.id] = order.parsedItems;
+        }
+    });
+    return map;
+};
+
+const restoreState = (savedMap: Record<number, any>) => {
+    if (!props.orders) return;
+    
+    orderList.value = props.orders.map(newOrder => {
+        if (savedMap[newOrder.id]) {
+            newOrder.parsedItems = savedMap[newOrder.id];
+            calculateTotal(newOrder);
+        }
+        return newOrder;
+    });
+};
 
 // UI states
 const expandedOrder = ref<number | null>(null);
@@ -363,6 +477,7 @@ const filteredOrders = computed(() => {
             order.stuff,
             order.orderStatus,
             order.paymentStatus,
+            order.status_pembayaran,
             order.deliveryMethod,
             order.paymentMethod,
             order.pickupDate,
@@ -398,24 +513,36 @@ const selectStatus = (order: Order, status: string) => {
 // ------------------------------------------------
 // UPDATE & DELETE
 // ------------------------------------------------
+const markAsDone = (order: Order) => {
+    if (confirm('Tandai pesanan ini sebagai Selesai?')) {
+        order.orderStatus = 'Selesai';
+        updateOrder(order);
+    }
+};
+
 const updateOrder = (order: Order) => {
     if (!order.weight || order.weight <= 0) {
-        alert('Masukkan berat laundry terlebih dahulu!');
+        alert('Masukkan jumlah/berat laundry terlebih dahulu!');
         return;
     }
+
+    const savedState = captureState();
 
     router.put(
         `/admin/orders/${order.id}`,
         {
             status_pesanan: order.orderStatus,
             status_pembayaran: order.paymentStatus,
-            berat: order.weight,
-            harga_per_kg: order.pricePerKg,
+            berat: order.weight, // Sum of quantities
+            harga_per_kg: 0, // Not used anymore
+            total: order.total,
+            items: order.parsedItems, // Send detailed items
         },
         {
             onSuccess: () => {
                 alert('Order berhasil diperbarui');
-                router.reload({ only: ['orders'] });
+                // Restore state after props update
+                restoreState(savedState);
             },
             onError: (errors) => {
                 console.error(errors);
@@ -440,14 +567,13 @@ const deleteOrder = (id: number) => {
 // REFRESH FROM DATABASE (PENTING)
 // ------------------------------------------------
 const refreshOrders = () => {
+    const savedState = captureState();
     isRefreshing.value = true;
     router.reload({
         only: ['orders'],
         onFinish: () => {
             isRefreshing.value = false;
-            // Update local ref if needed, but props should update automatically
-            // If we want to be sure:
-            if (props.orders) orderList.value = props.orders;
+            restoreState(savedState);
         },
     });
 };
@@ -465,6 +591,7 @@ const statusClass = (status: string) => {
             return 'bg-pink-100 text-pink-700 border border-pink-300';
         case 'Siap Diambil':
         case 'Siap Diantar':
+        case 'Selesai':
             return 'bg-green-100 text-green-700 border border-green-300';
         case 'Batal':
             return 'bg-red-100 text-red-700 border border-red-300';
@@ -483,6 +610,7 @@ const statusDotClass = (status: string) => {
             return 'bg-pink-400';
         case 'Siap Diambil':
         case 'Siap Diantar':
+        case 'Selesai':
             return 'bg-green-400';
         case 'Batal':
             return 'bg-red-400';
@@ -501,6 +629,7 @@ const statusTextClass = (status: string) => {
             return 'text-pink-700';
         case 'Siap Diambil':
         case 'Siap Diantar':
+        case 'Selesai':
             return 'text-green-700';
         case 'Batal':
             return 'text-red-700';
@@ -542,6 +671,7 @@ const statusOptions = [
     'Selesai Diproses',
     'Siap Diambil',
     'Siap Diantar',
+    'Selesai',
     'Batal',
 ];
 

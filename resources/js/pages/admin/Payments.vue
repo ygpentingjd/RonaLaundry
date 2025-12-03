@@ -17,7 +17,7 @@ kok tampilannya jadi bedaaa sama yang sebelumnya
                 >
                     <option value="All">All</option>
                     <option value="Pending">Pending</option>
-                    <option value="Verified">Verified</option>
+                    <option value="Lunas">Lunas</option>
                     <option value="Rejected">Rejected</option>
                 </select>
 
@@ -73,7 +73,7 @@ kok tampilannya jadi bedaaa sama yang sebelumnya
                                     'font-semibold text-yellow-600':
                                         payment.status === 'Pending',
                                     'font-semibold text-green-600':
-                                        payment.status === 'Verified',
+                                        payment.status === 'Lunas',
                                     'font-semibold text-red-500':
                                         payment.status === 'Rejected',
                                 }"
@@ -215,17 +215,6 @@ const filterStatus = ref('All');
 const selectedPayment = ref(null);
 const isRefreshing = ref(false);
 
-// 🔹 Ambil data dari Laravel
-const loadPayments = async () => {
-    const res = await axios.get('/admin/payments/data');
-    payments.value = res.data;
-};
-
-// 🔹 Load saat halaman dibuka
-onMounted(() => {
-    loadPayments();
-});
-
 // 🔹 Filter
 const filteredPayments = computed(() => {
     if (filterStatus.value === 'All') return props.payments;
@@ -242,12 +231,12 @@ const viewDetails = (payment) => {
 const verifyPayment = (id: any) => {
     if (confirm('Are you sure you want to verify this payment?')) {
         router.post(
-            route('admin.payments.verify', id),
+            `/admin/payments/${id}/verify`,
             {},
             {
                 onSuccess: () => {
                     selectedPayment.value = null;
-                    // alert("✅ Payment verified successfully!"); // Optional, flash message handles it
+                    alert("✅ Payment verified successfully!");
                 },
             },
         );
@@ -257,12 +246,12 @@ const verifyPayment = (id: any) => {
 const rejectPayment = (id: any) => {
     if (confirm('Are you sure you want to reject this payment?')) {
         router.post(
-            route('admin.payments.reject', id),
+            `/admin/payments/${id}/reject`,
             {},
             {
                 onSuccess: () => {
                     selectedPayment.value = null;
-                    // alert("❌ Payment rejected.");
+                    alert("❌ Payment rejected.");
                 },
             },
         );

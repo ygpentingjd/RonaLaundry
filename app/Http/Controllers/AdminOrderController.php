@@ -19,17 +19,19 @@ class AdminOrderController extends Controller
                 'stuff' => is_array($order->barang) ? implode(', ', $order->barang) : $order->barang,
                 'message' => $order->pesan,
                 'orderStatus' => $order->status_pesanan ?? $order->status,
-                'paymentStatus' => $order->status_pembayaran ?? $order->payment_status,
+                'paymentStatus' => $order->payment_status ?? $order->status_pembayaran,
                 'orderDate' => $order->tanggal,
                 'returnDate' => $order->tanggal_kembali,
                 'deliveryMethod' => $order->metode_pengantaran,
-                'total' => $order->total,  // ⬅️ DITAMBAH
+                'total' => $order->total,
+                'parsedItems' => $order->order_details, // Pass saved details
                 'date' => $order->created_at->format('d M Y | H:i') . ' WIB',
             ];
         });
 
         return inertia('admin/Orders', [
             'orders' => $orders,
+            'products' => \App\Models\Product::all(),
         ]);
     }
 
@@ -44,8 +46,8 @@ class AdminOrderController extends Controller
                 'stuff' => is_array($order->barang) ? implode(', ', $order->barang) : $order->barang,
                 'message' => $order->pesan,
                 'orderStatus' => $order->status_pesanan ?? $order->status,
-                'paymentStatus' => $order->status_pembayaran ?? $order->payment_status,
-                'pricePerKg' => $order->harga_per_kg ?? 3000,
+                'paymentStatus' => $order->payment_status ?? $order->status_pembayaran,
+                'pricePerKg' => $order->harga_per_kg ?? 0,
                 'weight' => $order->berat ?? 0,
                 'orderDate' => $order->tanggal,
                 'returnDate' => $order->tanggal_kembali,
@@ -67,16 +69,21 @@ class AdminOrderController extends Controller
         $validated = $request->validate([
             'status_pesanan' => 'required|string',
             'status_pembayaran' => 'required|string',
-            'berat' => 'required|numeric|min:0',
-            'harga_per_kg' => 'required|numeric|min:0',
+            'berat' => 'nullable|numeric|min:0',
+            'harga_per_kg' => 'nullable|numeric|min:0',
+            'total' => 'required|numeric|min:0',
+            'items' => 'nullable|array', // Validate items array
         ]);
 
         $updateData = [
             'status' => $validated['status_pesanan'],
             'payment_status' => $validated['status_pembayaran'],
-            'berat' => $validated['berat'],
-            'harga_per_kg' => $validated['harga_per_kg'],
-            'total' => ($validated['berat'] ?? 0) * ($validated['harga_per_kg'] ?? 0),
+            'status_pesanan' => $validated['status_pesanan'],
+            'status_pembayaran' => $validated['status_pembayaran'],
+            'berat' => $validated['berat'] ?? 0,
+            'harga_per_kg' => $validated['harga_per_kg'] ?? 0,
+            'total' => $validated['total'],
+            'order_details' => $validated['items'] ?? null, // Save items
         ];
 
         $order->update($updateData);

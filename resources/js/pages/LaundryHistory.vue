@@ -127,23 +127,29 @@
                                             {{ order.service }}
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <td class="py-1">Harga per Kg</td>
-                                        <td class="py-1 text-right">
-                                            Rp
-                                            {{
-                                                order.pricePerKg.toLocaleString()
-                                            }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1">Berat Laundry</td>
-                                        <td
-                                            class="py-1 text-right text-gray-700"
-                                        >
-                                            {{ order.weight }} kg
-                                        </td>
-                                    </tr>
+                                    <!-- 🔹 Dynamic Items -->
+                                    <template v-if="order.items && order.items.length > 0">
+                                        <tr v-for="(item, index) in order.items" :key="index">
+                                            <td class="py-1">{{ item.label }}</td>
+                                            <td class="py-1 text-right">
+                                                {{ item.qty }} x Rp {{ item.price.toLocaleString() }}
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <template v-else>
+                                        <tr>
+                                            <td class="py-1">Harga per Kg</td>
+                                            <td class="py-1 text-right">
+                                                Rp {{ order.pricePerKg.toLocaleString() }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-1">Berat Laundry</td>
+                                            <td class="py-1 text-right">
+                                                {{ order.weight }} kg
+                                            </td>
+                                        </tr>
+                                    </template>
                                     <tr>
                                         <td class="pt-3 font-semibold">
                                             Total
@@ -153,10 +159,7 @@
                                         >
                                             Rp
                                             {{
-                                                (
-                                                    order.weight *
-                                                    order.pricePerKg
-                                                ).toLocaleString()
+                                                (order.total || (order.weight * order.pricePerKg)).toLocaleString()
                                             }}
                                         </td>
                                     </tr>

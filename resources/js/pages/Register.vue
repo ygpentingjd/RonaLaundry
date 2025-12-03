@@ -136,7 +136,6 @@ import { router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 const form = ref({
-    name: '',
     username: '',
     email: '',
     password: '',

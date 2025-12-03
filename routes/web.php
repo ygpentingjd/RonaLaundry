@@ -16,7 +16,9 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 // Landing Page
-Route::get('/', fn() => Inertia::render('LandingPage'))->name('landing');
+Route::get('/', fn() => Inertia::render('LandingPage', [
+    'products' => \App\Models\Product::all()
+]))->name('landing');
 
 // Guest Routes (Belum Login)
 Route::middleware('guest')->group(function () {
@@ -32,7 +34,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/payment/upload/{id}', [PaymentController::class, 'uploadProof'])
         ->name('payment.upload');
 
-    Route::get('/landing', fn() => Inertia::render('LandingPage'))->name('landingpage');
+    Route::get('/landing', fn() => Inertia::render('LandingPage', [
+        'products' => \App\Models\Product::all()
+    ]))->name('landingpage');
     Route::get('/reservasi', [ReservasiController::class, 'create'])->name('reservasi');
     Route::get('/order', [UserOrderController::class, 'index'])->name('order');
 
@@ -71,8 +75,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('products', ProductController::class)->except(['create', 'edit']);
 });
 
-// Default Register Route
-Route::get('/Register', [RegisteredUserController::class, 'create'])->name('Register');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

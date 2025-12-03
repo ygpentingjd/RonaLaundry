@@ -19,7 +19,9 @@ class UserOrderController extends Controller
                     'id' => $order->id,
                     'tanggal' => $order->created_at->format('Y-m-d'),
                     'barang' => is_array($order->barang) ? implode(', ', $order->barang) : $order->barang,
-                    'jumlah' => $order->berat ?? 0, // Using weight as quantity/amount
+                    'jumlah' => $order->order_details 
+                        ? array_reduce($order->order_details, fn($carry, $item) => $carry + ($item['qty'] ?? 0), 0) 
+                        : ($order->berat ?? 0),
                     'status' => $order->status,
                     'harga' => 'Rp ' . number_format($order->total ?? 0, 0, ',', '.'),
                 ];

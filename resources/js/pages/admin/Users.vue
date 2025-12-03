@@ -68,14 +68,18 @@
                         <td class="px-5 py-3 text-sm text-gray-500">
                             {{ formatDate(user.updatedAt) }}
                         </td>
-                        <td
-                            :class="
-                                user.status === 'Active'
-                                    ? 'text-green-600'
-                                    : 'text-red-600'
-                            "
-                        >
-                            {{ user.status }}
+                        <td class="px-5 py-3">
+                            <span
+                                :class="{
+                                    'bg-green-100 text-green-800':
+                                        user.status === 'Active',
+                                    'bg-red-100 text-red-800':
+                                        user.status === 'Inactive',
+                                }"
+                                class="inline-flex rounded-full px-2 text-xs font-semibold leading-5"
+                            >
+                                {{ user.status }}
+                            </span>
                         </td>
                         <td class="space-x-3 px-5 py-3 text-center">
                             <button

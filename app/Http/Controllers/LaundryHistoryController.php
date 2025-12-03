@@ -24,6 +24,8 @@ class LaundryHistoryController extends Controller
                     'pickupDate' => $order->tanggal_kembali ? date('l, d F Y', strtotime($order->tanggal_kembali)) : '-',
                     'pricePerKg' => $order->harga_per_kg ?? 0,
                     'weight' => $order->berat ?? 0,
+                    'total' => $order->total ?? 0,
+                    'items' => $order->order_details, 
                     'paymentStatus' => $order->payment_status,
                     'status' => $order->status,
                     'notes' => $order->pesan,

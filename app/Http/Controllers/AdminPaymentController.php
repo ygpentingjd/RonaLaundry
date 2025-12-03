@@ -10,7 +10,7 @@ class AdminPaymentController extends Controller
 {
     public function index()
     {
-        $payments = Reservasi::with('user')
+        $payments = Reservasi::with(['user', 'infoPembayaran'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($order) {
@@ -20,9 +20,11 @@ class AdminPaymentController extends Controller
                     'userName' => $order->nama,
                     'method' => $order->pembayaran, // Assuming 'pembayaran' stores method like 'Transfer', 'COD'
                     'total' => $order->total ?? 0,
-                    'status' => $order->status_pembayaran ?? 'Pending',
+                    'status' => $order->payment_status ?? 'Pending',
                     'date' => $order->created_at->format('Y-m-d'),
-                    'proof' => $order->bukti_pembayaran ? asset('storage/' . $order->bukti_pembayaran) : '/images/sample-proof.jpg', // Adjust path as needed
+                    'proof' => $order->infoPembayaran && $order->infoPembayaran->bukti_pembayaran 
+                        ? asset('storage/' . $order->infoPembayaran->bukti_pembayaran) 
+                        : '/images/sample-proof.jpg',
                 ];
             });
 
@@ -34,8 +36,14 @@ class AdminPaymentController extends Controller
     public function verify($id)
     {
         $order = Reservasi::findOrFail($id);
-        $order->status_pembayaran = 'Lunas'; // Or 'Verified' depending on your enum/string
+        $order->payment_status = 'Lunas'; 
+        $order->status_pembayaran = 'Lunas'; // Sync duplicate column
         $order->save();
+
+        // Also update Pembayaran record if exists
+        if ($order->infoPembayaran) {
+            $order->infoPembayaran->update(['status' => 'Lunas']);
+        }
 
         return back()->with('success', 'Payment verified successfully!');
     }
@@ -43,8 +51,14 @@ class AdminPaymentController extends Controller
     public function reject($id)
     {
         $order = Reservasi::findOrFail($id);
-        $order->status_pembayaran = 'Ditolak'; // Or 'Rejected'
+        $order->payment_status = 'Rejected';
+        $order->status_pembayaran = 'Rejected'; // Sync duplicate column
         $order->save();
+
+        // Also update Pembayaran record if exists
+        if ($order->infoPembayaran) {
+            $order->infoPembayaran->update(['status' => 'Rejected']);
+        }
 
         return back()->with('success', 'Payment rejected.');
     }

@@ -10,8 +10,10 @@ const props = defineProps<{
         nama_lengkap?: string;
         nomor_telepon?: string;
         alamat_lengkap?: string;
-    }
-}>();
+    };
+    products: any[];
+}
+>();
 
 const nama = ref(props.user?.nama_lengkap || '')
 const whatsapp = ref(props.user?.nomor_telepon || '')
@@ -24,7 +26,7 @@ const tanggal = ref(new Date().toISOString().split('T')[0])
 const tanggal_kembali = ref('')
 const pesan = ref('')
 
-const barangOptions = ['Selimut', 'Boneka', 'Karpet', 'Sepatu', 'Alat Ibadah', 'Handuk']
+const barangOptions = props.products || [];
 
 const toggleBarang = (item: string) => {
   if (barang.value.includes(item)) {
@@ -146,17 +148,17 @@ const submitForm = () => {
             <div class="grid grid-cols-3 gap-3">
               <button
                 v-for="item in barangOptions"
-                :key="item"
+                :key="item.id"
                 type="button"
-                @click="toggleBarang(item)"
+                @click="toggleBarang(item.nama_barang)"
                 :class="[
                   'p-3 rounded-lg font-medium shadow-sm transition-all border',
-                  barang.includes(item)
+                  barang.includes(item.nama_barang)
                     ? 'bg-blue-500 text-white border-blue-500 shadow-md'
                     : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-blue-100 hover:border-blue-300'
                 ]"
               >
-                {{ item }}
+                {{ item.nama_barang }}
               </button>
             </div>
           </div>

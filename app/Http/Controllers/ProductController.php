@@ -67,15 +67,12 @@ class ProductController extends Controller
         // jika ada gambar baru
         if ($request->hasFile('image')) {
             // hapus file lama
-            if ($product->image && Storage::exists('public/products/' . $product->image)) {
-                Storage::delete('public/products/' . $product->image);
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
             }
 
             // simpan file baru
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->storeAs('public/products', $imageName);
-
-            $product->image = $imageName;
+            $product->image = $request->file('image')->store('products', 'public');
         }
 
         // update field lain
@@ -99,8 +96,8 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
 
         // hapus gambar dari storage
-        if ($product->image && Storage::exists('public/products/' . $product->image)) {
-            Storage::delete('public/products/' . $product->image);
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
         }
 
         $product->delete();
