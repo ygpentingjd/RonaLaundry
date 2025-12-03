@@ -72,23 +72,25 @@
                         </div>
                     </div>
 
-                    <button
-                        @click="toggleDetail(order.id)"
-                        class="rounded-lg bg-pink-400 px-4 py-1 text-sm text-white shadow transition hover:bg-pink-500"
-                    >
-                        {{
-                            expandedOrder === order.id
-                                ? 'Tutup ▲'
-                                : 'Lihat Detail ▼'
-                        }}
-                    </button>
-                    <button
-                        v-if="order.orderStatus !== 'Selesai'"
-                        @click="markAsDone(order)"
-                        class="rounded-lg bg-pink-400 px-4 py-1 text-sm text-white shadow transition hover:bg-pink-500"
-                    >
-                        Selesai
-                    </button>
+                    <div class="flex gap-2">
+                        <button
+                            @click="toggleDetail(order.id)"
+                            class="rounded-lg bg-pink-400 px-4 py-1 text-sm text-white shadow transition hover:bg-pink-500"
+                        >
+                            {{
+                                expandedOrder === order.id
+                                    ? 'Tutup ▲'
+                                    : 'Lihat Detail ▼'
+                            }}
+                        </button>
+                        <button
+                            v-if="order.orderStatus !== 'Selesai'"
+                            @click="markAsDone(order)"
+                            class="rounded-lg bg-pink-400 px-4 py-1 text-sm text-white shadow transition hover:bg-pink-500"
+                        >
+                            Selesai
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Detail (Dropdown) -->
