@@ -5,20 +5,39 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Reservasi;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 
 class AdminPaymentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $payments = Reservasi::with(['user', 'infoPembayaran'])
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($order) {
+        $query = Reservasi::with(['user', 'infoPembayaran'])
+            ->orderBy('created_at', 'desc');
+
+        // Apply Filters
+        if ($request->filled('month')) {
+            $query->whereMonth('created_at', $request->month);
+        }
+
+        if ($request->filled('year')) {
+            $query->whereYear('created_at', $request->year);
+        }
+
+        // Calculate Totals
+        $totalAllRevenue = Reservasi::where('payment_status', 'Lunas')->sum('total');
+        
+        // Calculate Filtered Revenue (based on current query filters + Lunas status)
+        // We clone the query to avoid modifying the main pagination query
+        $filteredRevenue = (clone $query)->where('payment_status', 'Lunas')->sum('total');
+
+        $payments = $query->paginate(10)
+            ->withQueryString()
+            ->through(function ($order) {
                 return [
                     'id' => $order->id,
                     'orderId' => 'ORD' . str_pad($order->id, 3, '0', STR_PAD_LEFT),
                     'userName' => $order->nama,
-                    'method' => $order->pembayaran, // Assuming 'pembayaran' stores method like 'Transfer', 'COD'
+                    'method' => $order->pembayaran,
                     'total' => $order->total ?? 0,
                     'status' => $order->payment_status ?? 'Pending',
                     'date' => $order->created_at->format('Y-m-d'),
@@ -28,8 +47,15 @@ class AdminPaymentController extends Controller
                 ];
             });
 
+        // Get Min Year for Filter
+        $minYear = Reservasi::min(DB::raw('YEAR(created_at)')) ?? date('Y');
+
         return Inertia::render('admin/Payments', [
             'payments' => $payments,
+            'totalAllRevenue' => $totalAllRevenue,
+            'filteredRevenue' => $filteredRevenue,
+            'filters' => $request->only(['month', 'year']),
+            'minYear' => (int) $minYear,
         ]);
     }
 

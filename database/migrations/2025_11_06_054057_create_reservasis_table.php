@@ -12,10 +12,10 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('nama');
             $table->string('whatsapp');
-            $table->string('layanan');
+            $table->string('layanan')->default('Biasa');
             $table->json('barang');
             $table->text('alamat');
-            $table->string('pembayaran');
+            $table->string('pembayaran')->default('Cash');
             $table->date('tanggal');
             $table->text('pesan');
             $table->float('berat')->nullable();

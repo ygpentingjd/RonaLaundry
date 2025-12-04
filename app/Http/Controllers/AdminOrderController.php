@@ -26,6 +26,7 @@ class AdminOrderController extends Controller
                 'total' => $order->total,
                 'parsedItems' => $order->order_details, // Pass saved details
                 'date' => $order->created_at->format('d M Y | H:i') . ' WIB',
+                'whatsapp' => $order->whatsapp,
             ];
         });
 
@@ -53,6 +54,7 @@ class AdminOrderController extends Controller
                 'returnDate' => $order->tanggal_kembali,
                 'deliveryMethod' => $order->metode_pengantaran,
                 'date' => $order->created_at->format('d M Y | H:i') . ' WIB',
+                'whatsapp' => $order->whatsapp,
             ];  
         });
 
@@ -84,6 +86,7 @@ class AdminOrderController extends Controller
             'harga_per_kg' => $validated['harga_per_kg'] ?? 0,
             'total' => $validated['total'],
             'order_details' => $validated['items'] ?? null, // Save items
+            'barang' => isset($validated['items']) ? collect($validated['items'])->pluck('name')->toArray() : [], // Sync barang column
         ];
 
         $order->update($updateData);

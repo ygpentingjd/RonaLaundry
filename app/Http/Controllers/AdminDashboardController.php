@@ -26,25 +26,27 @@ class AdminDashboardController extends Controller
             ['title' => 'Pending Verification', 'value' => $pendingVerification, 'icon' => 'hourglass_empty'],
         ];
 
-        // 2. Chart Data (Monthly Income for current year)
-        $monthlyIncome = Reservasi::select(
-            DB::raw('SUM(total) as total'),
-            DB::raw('MONTH(created_at) as month')
-        )
-        ->whereYear('created_at', date('Y'))
-        ->where(function ($q) {
-            $q->where('payment_status', 'Lunas')
-              ->orWhere('status_pembayaran', 'Lunas');
-        })
-        ->whereIn('status', ['Selesai', 'Siap Diantar'])
-        ->groupBy('month')
-        ->pluck('total', 'month')
-        ->toArray();
-
-        // Fill missing months with 0
+        // 2. Chart Data (Last 12 Months)
         $chartData = [];
-        for ($i = 1; $i <= 12; $i++) {
-            $chartData[] = $monthlyIncome[$i] ?? 0;
+        $chartCategories = [];
+        
+        for ($i = 11; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $month = $date->month;
+            $year = $date->year;
+            $label = $date->translatedFormat('M Y'); // e.g. "Dec 2024"
+
+            $total = Reservasi::whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->where(function ($q) {
+                    $q->where('payment_status', 'Lunas')
+                      ->orWhere('status_pembayaran', 'Lunas');
+                })
+                ->whereIn('status', ['Selesai', 'Siap Diantar'])
+                ->sum('total');
+
+            $chartData[] = $total;
+            $chartCategories[] = $label;
         }
 
         $chartSeries = [
@@ -82,6 +84,7 @@ class AdminDashboardController extends Controller
         return Inertia::render('admin/Dashboard', [
             'stats' => $stats,
             'chartSeries' => $chartSeries,
+            'chartCategories' => $chartCategories,
             'recentOrders' => $recentOrders,
             'recentUsers' => $recentUsers,
         ]);

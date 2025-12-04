@@ -245,10 +245,23 @@
                                             {{ order.deliveryMethod }}
                                         </td>
                                     </tr>
-                                    <!-- 🔹 Dynamic Input based on Unit -->
                                     <tr v-for="(item, index) in getOrderItems(order)" :key="index">
                                         <td class="py-1">
-                                            {{ item.label }}
+                                            <select
+                                                v-model="item.name"
+                                                @change="updateItemDetails(item, order)"
+                                                class="w-full rounded-lg border border-gray-300 bg-white px-2 py-1 text-sm focus:border-pink-500 focus:outline-none"
+                                            >
+                                                <option value="" disabled>Pilih Barang</option>
+                                                <option
+                                                    v-for="p in products"
+                                                    :key="p.id"
+                                                    :value="p.nama_barang"
+                                                >
+                                                    {{ p.nama_barang }}
+                                                </option>
+                                            </select>
+                                            <div class="mt-1 text-xs text-gray-500">{{ item.label }}</div>
                                         </td>
                                         <td class="py-1 text-right">
                                             <div class="flex items-center justify-end gap-2">
@@ -259,10 +272,28 @@
                                                     v-model.number="item.qty"
                                                     type="number"
                                                     min="0"
-                                                    class="w-24 rounded-lg border px-2 py-1 text-right text-sm focus:ring-2 focus:ring-pink-300 focus:outline-none"
+                                                    class="w-20 rounded-lg border px-2 py-1 text-right text-sm focus:ring-2 focus:ring-pink-300 focus:outline-none"
                                                     @input="calculateTotal(order)"
                                                 />
+                                                <button
+                                                    @click="removeItem(order, index)"
+                                                    class="ml-1 text-red-400 hover:text-red-600"
+                                                    title="Hapus Item"
+                                                >
+                                                    <span class="material-icons text-sm">delete</span>
+                                                </button>
                                             </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="py-2 text-center">
+                                            <button
+                                                @click="addItem(order)"
+                                                class="flex items-center justify-center gap-1 text-sm font-medium text-pink-500 hover:text-pink-700 hover:underline"
+                                            >
+                                                <span class="material-icons text-sm">add_circle</span>
+                                                Tambah Item
+                                            </button>
                                         </td>
                                     </tr>
                                     <tr>
@@ -297,19 +328,39 @@
                         </div>
 
                         <!-- 🔹 Tombol Aksi -->
-                        <div class="mt-4 flex justify-end gap-3">
-                            <button
-                                class="text-blue-500 hover:underline"
-                                @click="updateOrder(order)"
+                        <!-- 🔹 Tombol Aksi -->
+                        <div class="mt-4 flex items-center justify-between">
+                            <!-- WhatsApp Button (Left) -->
+                            <a
+                                v-if="order.whatsapp"
+                                :href="getWhatsAppLink(order.whatsapp, order.customer)"
+                                target="_blank"
+                                class="flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white shadow hover:bg-green-600"
                             >
-                                Simpan
-                            </button>
-                            <button
-                                class="text-red-500 hover:underline"
-                                @click="deleteOrder(order.id)"
-                            >
-                                Hapus
-                            </button>
+                                <img
+                                    src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+                                    alt="WA"
+                                    class="h-5 w-5"
+                                />
+                                Chat Customer
+                            </a>
+                            <span v-else class="text-sm text-gray-400">No WhatsApp</span>
+
+                            <!-- Action Buttons (Right) -->
+                            <div class="flex gap-3">
+                                <button
+                                    class="text-blue-500 hover:underline"
+                                    @click="updateOrder(order)"
+                                >
+                                    Simpan
+                                </button>
+                                <button
+                                    class="text-red-500 hover:underline"
+                                    @click="deleteOrder(order.id)"
+                                >
+                                    Hapus
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </transition>
@@ -354,6 +405,7 @@ interface Order {
     pickupDate?: string;
     massage?: string;
     total?: number;
+    whatsapp?: string;
     // Local state for dynamic items
     parsedItems?: {
         name: string;
@@ -428,6 +480,46 @@ const calculateTotal = (order: Order) => {
 
 const formatPrice = (price: number) => {
     return 'Rp ' + price.toLocaleString();
+};
+
+const addItem = (order: Order) => {
+    if (!order.parsedItems) order.parsedItems = [];
+    order.parsedItems.push({
+        name: '',
+        label: 'Pilih Barang',
+        unit: 'kg',
+        price: 0,
+        qty: 1,
+    });
+};
+
+const removeItem = (order: Order, index: number) => {
+    if (!order.parsedItems) return;
+    order.parsedItems.splice(index, 1);
+    calculateTotal(order);
+};
+
+const updateItemDetails = (item: any, order: Order) => {
+    // Find exact match first, fallback to loose match
+    let product = props.products.find((p) => p.nama_barang === item.name);
+    if (!product) {
+         product = findProductByName(item.name);
+    }
+
+    if (product) {
+        item.name = product.nama_barang; // Ensure name matches product
+        item.unit = product.satuan;
+        item.price =
+            order.service.toLowerCase() === 'kilat'
+                ? Number(product.harga_kilat)
+                : Number(product.harga_reguler);
+
+        // Update label
+        if (item.unit === 'pcs') item.label = `Jumlah ${item.name} (pcs)`;
+        else if (item.unit === 'meter') item.label = `Panjang ${item.name} (m)`;
+        else item.label = `Berat ${item.name} (kg)`;
+    }
+    calculateTotal(order);
 };
 
 onMounted(() => {
@@ -679,6 +771,25 @@ const statusOptions = [
 
 const clearSearch = () => {
     searchQuery.value = '';
+};
+
+const getWhatsAppLink = (phone: string, name: string) => {
+    if (!phone) return '#';
+    
+    // 1. Hapus karakter non-digit
+    let clean = phone.replace(/[^0-9]/g, '');
+
+    // 2. Ubah 08xx menjadi 628xx
+    if (clean.startsWith('0')) {
+        clean = '62' + clean.slice(1);
+    }
+
+    // 3. Buat pesan template
+    const message = `Hallo kak ${name}, kami dari pihak Rona Laundry ingin melakukan konfirmasi bahwa pesanan kakak telah selesai diprose. Mohon segera untuk melakukan pembayaran melalui methode pembayaran yang telah dipilih. 
+Terima kasih.`;
+    const encodedMessage = encodeURIComponent(message);
+
+    return `https://wa.me/${clean}?text=${encodedMessage}`;
 };
 </script>
 

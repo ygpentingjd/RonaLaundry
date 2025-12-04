@@ -12,7 +12,7 @@ class LaundryHistoryController extends Controller
     public function index()
     {
         $orders = Reservasi::where('user_id', Auth::id())
-            ->whereIn('status', ['Selesai Diproses', 'Siap Diambil', 'Siap Diantar', 'Selesai'])
+            ->whereIn('status', ['Selesai Diproses', 'Siap Diambil', 'Siap Diantar', 'Selesai', 'Batal'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($order) {

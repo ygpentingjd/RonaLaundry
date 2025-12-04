@@ -37,7 +37,7 @@
 
         <!-- 🔹 Chart -->
         <div class="mb-8 rounded-xl bg-white p-6 shadow-md">
-            <h3 class="mb-4 font-semibold text-gray-700">Pemasukan Bulanan</h3>
+            <h3 class="mb-4 font-semibold text-gray-700">Pemasukan 12 Bulan Terakhir</h3>
             <div class="h-96">
                 <apexchart
                     type="bar"
@@ -157,9 +157,10 @@ interface User {
   email: string;
 }
 
-defineProps<{
+const props = defineProps<{
   stats: StatCard[];
   chartSeries: ChartSeries[];
+  chartCategories: string[];
   recentOrders: Order[];
   recentUsers: User[];
 }>();
@@ -170,20 +171,7 @@ const chartOptions = ref<ApexOptions>({
     plotOptions: { bar: { borderRadius: 6, columnWidth: '45%' } },
     dataLabels: { enabled: false },
     xaxis: {
-        categories: [
-            'Jan',
-            'Feb',
-            'Mar',
-            'Apr',
-            'May',
-            'Jun',
-            'Jul',
-            'Aug',
-            'Sep',
-            'Oct',
-            'Nov',
-            'Dec',
-        ],
+        categories: props.chartCategories,
     },
     yaxis: { labels: { formatter: (val) => `Rp ${val.toLocaleString()}` } },
     grid: { borderColor: '#f3f4f6' }, 

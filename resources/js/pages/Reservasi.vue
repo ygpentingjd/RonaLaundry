@@ -36,6 +36,39 @@ const toggleBarang = (item: string) => {
   }
 }
 
+const formatPhoneNumber = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/\D/g, ''); // Hapus semua karakter non-digit
+
+    // Jika user mengetik '0' di awal, ubah jadi '62'
+    if (value.startsWith('0')) {
+        value = '62' + value.slice(1);
+    }
+
+    // Jika belum ada '62', tambahkan (opsional, tapi user minta format +62)
+    // Tapi kita biarkan user mengetik dulu, kalau kosong jangan diubah
+    if (value.length > 0 && !value.startsWith('62')) {
+       // value = '62' + value; // Bisa di-uncomment jika ingin paksa 62
+    }
+
+    // Format tampilan: +62 8xx-xxxx-xxxx
+    let formatted = '';
+    if (value.length > 0) {
+        formatted = '+' + value;
+        if (value.length > 2) {
+            formatted = '+' + value.slice(0, 2) + ' ' + value.slice(2);
+        }
+        if (value.length > 6) {
+            formatted = '+' + value.slice(0, 2) + ' ' + value.slice(2, 6) + '-' + value.slice(6);
+        }
+        if (value.length > 10) {
+            formatted = '+' + value.slice(0, 2) + ' ' + value.slice(2, 6) + '-' + value.slice(6, 10) + '-' + value.slice(10);
+        }
+    }
+    
+    whatsapp.value = formatted;
+};
+
 const submitForm = () => {
   router.post('/reservasi/store', {
     nama: nama.value,
@@ -111,12 +144,9 @@ const submitForm = () => {
             <input
               v-model="whatsapp"
               type="tel"
-              placeholder="08123456789"
-              inputmode="numeric"
-              pattern="[0-9]*"
-              maxlength="15"
+              placeholder="+62 8xx-xxxx-xxxx"
               class="w-full p-3 border border-gray-300 rounded-md shadow-sm outline-none focus:ring-2 focus:ring-blue-400"
-              @input="whatsapp = whatsapp.replace(/[^0-9]/g, '')"
+              @input="formatPhoneNumber"
               required
             />
           </div>
