@@ -119,7 +119,7 @@
 
                             <input
                                 type="file"
-                                class="mb-3"
+                                class="mb-3 mr-4 w-70 rounded-lg border border-gray-300 p-2 text-sm text-gray-700 focus:border-pink-500 focus:outline-none"
                                 accept="image/*"
                                 @change="(e) => selectPaymentFile(e, order.id)"
                             />

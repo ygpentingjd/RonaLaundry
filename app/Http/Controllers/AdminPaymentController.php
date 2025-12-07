@@ -30,6 +30,12 @@ class AdminPaymentController extends Controller
         // We clone the query to avoid modifying the main pagination query
         $filteredRevenue = (clone $query)->where('payment_status', 'Lunas')->sum('total');
 
+        // Calculate Annual Revenue (Current Year)
+        $currentYear = date('Y');
+        $annualRevenue = Reservasi::whereYear('created_at', $currentYear)
+            ->where('payment_status', 'Lunas')
+            ->sum('total');
+
         $payments = $query->paginate(10)
             ->withQueryString()
             ->through(function ($order) {
@@ -37,6 +43,8 @@ class AdminPaymentController extends Controller
                     'id' => $order->id,
                     'orderId' => 'ORD' . str_pad($order->id, 3, '0', STR_PAD_LEFT),
                     'userName' => $order->nama,
+                    // Check user relasi first, fallback to manual phone if exists (assuming reservasi has phone/whatsapp col)
+                    'phone' => $order->whatsapp ?? ($order->user->phone ?? null), 
                     'method' => $order->pembayaran,
                     'total' => $order->total ?? 0,
                     'status' => $order->payment_status ?? 'Pending',
@@ -54,6 +62,7 @@ class AdminPaymentController extends Controller
             'payments' => $payments,
             'totalAllRevenue' => $totalAllRevenue,
             'filteredRevenue' => $filteredRevenue,
+            'annualRevenue' => $annualRevenue,
             'filters' => $request->only(['month', 'year']),
             'minYear' => (int) $minYear,
         ]);

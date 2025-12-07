@@ -3,8 +3,8 @@
         <Head title="Dasboard Admin - RonaLaundry" />
         <!-- 🔹 Header -->
         <div class="mb-8 flex items-center justify-between">
-            <h1 class="mb-6 text-3xl font-semibold text-pink-700">
-                Daftar Produk Laundry
+            <h1 class="mb-6 text-3xl font-semibold text-black">
+                Dashoard Admin
             </h1>
             <div class="flex items-center space-x-3">
                 <span class="text-xl font-semibold text-slate-900">Admin</span>

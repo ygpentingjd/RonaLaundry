@@ -5,7 +5,7 @@
         <div
             class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
         >
-            <h1 class="text-3xl font-semibold text-pink-700">
+            <h1 class="text-3xl font-semibold text-black">
                 Daftar Produk Laundry
             </h1>
             <button
@@ -361,11 +361,11 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import axios from 'axios';
-import { onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import AdminPanel from '../AdminPanel.vue';
 
 interface ProductRaw {
-    id: number;
+    id_product: number; // Adjusted to match Model primary key
     nama_barang: string;
     satuan: string;
     estimasi_waktu: string;
@@ -404,7 +404,7 @@ const form = ref<any>({
 // mapping helper
 function mapProductFromApi(item: ProductRaw) {
     return {
-        id: item.id,
+        id: item.id_product, // Map from id_product
         name: item.nama_barang,
         unit: item.satuan,
         estimate: item.estimasi_waktu,
@@ -420,14 +420,10 @@ function mapProductFromApi(item: ProductRaw) {
 
 // Use computed or watch to map props.products if needed, or just use it directly if structure matches
 // For now, let's map it on mount or watch
-const productList = ref<any[]>([]);
-
-onMounted(() => {
-    if (props.products) {
-        productList.value = props.products.map((p: ProductRaw) =>
-            mapProductFromApi(p),
-        );
-    }
+// Use computed to map props.products so it stays reactive to Inertia updates
+const productList = computed(() => {
+    if (!props.products) return [];
+    return props.products.map((p: ProductRaw) => mapProductFromApi(p));
 });
 
 function toggleDetail(index: number) {
@@ -537,6 +533,7 @@ async function submitForm() {
         if (editMode.value && form.value.id) {
             // use method spoofing to ensure compatibility
             fd.append('_method', 'PUT');
+            // Route resource 'products' -> PUT /products/{id}
             await axios.post(`/products/${form.value.id}`, fd, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
@@ -549,10 +546,7 @@ async function submitForm() {
         }
 
         closeForm();
-        router.reload({ only: ['products'] }); // Reload props
-        // Manually update local state if needed, or rely on prop update
-        // For simplicity, we can just reload the whole page or use router.visit if props don't update automatically deeply
-        window.location.reload();
+        router.reload({ only: ['products'] }); // Reload props from Inertia
     } catch (e: any) {
         console.error(e);
         alert(
@@ -563,9 +557,11 @@ async function submitForm() {
 }
 
 async function saveChanges(product: any) {
-    // map fields back to API structure and send
+    // NOTE: We use FormData with _method: 'PUT' to support potential image updates if we expanded this form,
+    // but even for text-only, it's consistent.
+    // Important: field names must match Controller validation (nama_barang, etc.)
     const fd = new FormData();
-    fd.append('_method', 'PUT');
+    fd.append('_method', 'PUT'); // Method spoofing
     fd.append('nama_barang', product.name);
     fd.append('satuan', product.unit);
     fd.append('estimasi_waktu', product.estimate);
@@ -573,16 +569,17 @@ async function saveChanges(product: any) {
     fd.append('harga_kilat', String(product.price_express ?? ''));
     fd.append('deskripsi', product.description ?? '');
 
-    // Note: editing inline doesn't support image change here
+    // Note: Inline edit here doesn't support image change by default based on UI, 
+    // but if you wanted to add it, you'd append 'image' here.
+
     try {
-        await axios.post(`/products/${product.id}`, fd, {
+        await axios.post(`/products/${product.id}`, fd, { 
             headers: { 'Content-Type': 'multipart/form-data' },
         });
         alert('Perubahan disimpan');
-        window.location.reload();
-    } catch (e) {
+    } catch (e: any) {
         console.error(e);
-        alert('Gagal menyimpan perubahan');
+        alert('Gagal menyimpan perubahan: ' + (e.response?.data?.message || 'Error'));
     }
 }
 

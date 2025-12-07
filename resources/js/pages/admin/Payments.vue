@@ -4,19 +4,24 @@ kok tampilannya jadi bedaaa sama yang sebelumnya
         <Head title="Payments Verification - RonaLaundry" />
         <!-- 🔹 Header -->
         <div class="mb-8">
-            <h1 class="mb-6 text-3xl font-semibold text-pink-700">
+            <h1 class="mb-6 text-3xl font-semibold text-black">
                 Payment Verification
             </h1>
 
             <!-- 🔹 Stats Cards -->
-            <div class="mb-6 grid grid-cols-2 gap-6">
-                <div class="rounded-xl border border-pink-200 bg-pink-50 p-6 shadow-sm">
-                    <p class="text-sm font-medium text-gray-600">Total Semua Pendapatan (Lunas)</p>
-                    <h3 class="text-2xl font-bold text-pink-700">Rp {{ totalAllRevenue.toLocaleString() }}</h3>
+            <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div class="rounded-xl border border-pink-200 bg-pink-50 p-4 shadow-sm">
+                    <p class="text-xs font-medium text-gray-600">Total Semua Pendapatan (Lunas)</p>
+                    <h3 class="text-xl font-bold text-pink-700">Rp {{ totalAllRevenue.toLocaleString() }}</h3>
                 </div>
-                <div class="rounded-xl border border-blue-200 bg-blue-50 p-6 shadow-sm">
-                    <p class="text-sm font-medium text-gray-600">Pendapatan Periode Ini (Lunas)</p>
-                    <h3 class="text-2xl font-bold text-blue-700">Rp {{ filteredRevenue.toLocaleString() }}</h3>
+                <div class="rounded-xl border border-blue-200 bg-blue-50 p-4 shadow-sm">
+                    <p class="text-xs font-medium text-gray-600">Pendapatan Periode Ini (Lunas)</p>
+                    <h3 class="text-xl font-bold text-blue-700">Rp {{ filteredRevenue.toLocaleString() }}</h3>
+                </div>
+                <!-- Annual Revenue -->
+                <div class="rounded-xl border border-yellow-200 bg-yellow-50 p-4 shadow-sm">
+                    <p class="text-xs font-medium text-gray-600">Omset Tahunan (Tahun Ini)</p>
+                    <h3 class="text-xl font-bold text-yellow-700">Rp {{ annualRevenue.toLocaleString() }}</h3>
                 </div>
             </div>
 
@@ -49,7 +54,7 @@ kok tampilannya jadi bedaaa sama yang sebelumnya
                         class="rounded-lg border border-gray-300 px-3 py-2 text-gray-700 focus:ring-2 focus:ring-pink-400 focus:outline-none"
                     >
                         <option value="All">All Status</option>
-                        <option value="Pending">Pending</option>
+                        <option value="Pending">Menunggu Pembayaran (Pending)</option>
                         <option value="Lunas">Lunas</option>
                         <option value="Rejected">Rejected</option>
                     </select>
@@ -238,6 +243,24 @@ kok tampilannya jadi bedaaa sama yang sebelumnya
                         Reject
                     </button>
                 </div>
+
+                <!-- Chat Customer Button -->
+                <div class="mt-4 flex justify-center border-t pt-4">
+                     <a
+                        v-if="selectedPayment.phone"
+                        :href="getWhatsAppLink(selectedPayment.phone, selectedPayment.userName)"
+                        target="_blank"
+                        class="flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white shadow hover:bg-green-600"
+                    >
+                        <img
+                            src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+                            alt="WA"
+                            class="h-5 w-5"
+                        />
+                        Chat Customer
+                    </a>
+                    <span v-else class="text-sm text-gray-400">No Phone Number</span>
+                </div>
             </div>
         </div>
     </AdminPanel>
@@ -257,6 +280,7 @@ interface Payment {
     status: string;
     date: string;
     proof?: string;
+    phone?: string;
 }
 
 const props = defineProps<{
@@ -266,6 +290,7 @@ const props = defineProps<{
     };
     totalAllRevenue: number;
     filteredRevenue: number;
+    annualRevenue: number;
     filters: {
         month?: string;
         year?: string;
@@ -299,6 +324,18 @@ const getMonthName = (m: number) => {
     const date = new Date();
     date.setMonth(m - 1);
     return date.toLocaleString('default', { month: 'long' });
+};
+
+const getWhatsAppLink = (phone: string, name: string) => {
+    if (!phone) return '#';
+    
+    let clean = phone.replace(/[^0-9]/g, '');
+    if (clean.startsWith('0')) {
+        clean = '62' + clean.slice(1);
+    }
+
+    const message = `Halo ${name}, kami dari Rona Laundry ingin mengkonfirmasi pembayaran Anda.`;
+    return `https://wa.me/${clean}?text=${encodeURIComponent(message)}`;
 };
 
 const applyFilters = () => {

@@ -90,6 +90,11 @@ class ReservasiController extends Controller
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
+        // VALIDASI: Hanya bisa batal jika status masih 'Menunggu Penjemputan'
+        if ($reservasi->status !== 'Menunggu Penjemputan') {
+            return redirect()->back()->withErrors(['message' => 'Pesanan tidak bisa dibatalkan karena sudah diproses/jemput.']);
+        }
+
         $reservasi->delete();
 
         if (Reservasi::count() === 0) {

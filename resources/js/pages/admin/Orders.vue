@@ -3,7 +3,7 @@
         <Head title="Orders Management - RonaLaundry" />
         <!-- Header -->
         <div class="mb-8 flex items-center justify-between">
-            <h1 class="text-3xl font-semibold text-pink-700">
+            <h1 class="text-3xl font-semibold text-black">
                 Orders Management
             </h1>
 
@@ -158,7 +158,7 @@
                             <div class="relative inline-block text-left">
                                 <button
                                     @click="toggleDropdown(order.id)"
-                                    class="flex w-52 items-center justify-between rounded-full px-3 py-1 text-sm font-medium"
+                                    class="flex w-52 items-center justify-center rounded-full px-3 py-1 text-sm font-medium"
                                     :class="statusClass(order.orderStatus)"
                                 >
                                     {{ order.orderStatus }}
@@ -174,7 +174,7 @@
                                     >
                                         <ul class="py-1 text-sm text-gray-700">
                                             <li
-                                                v-for="status in statusOptions"
+                                                v-for="status in getStatusOptions(order)"
                                                 :key="status"
                                                 @click="
                                                     selectStatus(order, status)
@@ -222,7 +222,7 @@
                                         <td
                                             class="py-1 text-right text-gray-600"
                                         >
-                                            {{ order.message }}
+                                            {{ order.message || '-' }}
                                         </td>
                                     </tr>
                                     <tr>
@@ -250,7 +250,8 @@
                                             <select
                                                 v-model="item.name"
                                                 @change="updateItemDetails(item, order)"
-                                                class="w-full rounded-lg border border-gray-300 bg-white px-2 py-1 text-sm focus:border-pink-500 focus:outline-none"
+                                                class="w-full rounded-lg border border-gray-300 bg-white px-2 py-1 text-sm focus:border-pink-500 focus:outline-none disabled:bg-gray-100 disabled:text-gray-500"
+                                                :disabled="!canEditWeight(order.orderStatus)"
                                             >
                                                 <option value="" disabled>Pilih Barang</option>
                                                 <option
@@ -272,13 +273,15 @@
                                                     v-model.number="item.qty"
                                                     type="number"
                                                     min="0"
-                                                    class="w-20 rounded-lg border px-2 py-1 text-right text-sm focus:ring-2 focus:ring-pink-300 focus:outline-none"
+                                                    class="w-20 rounded-lg border px-2 py-1 text-right text-sm focus:ring-2 focus:ring-pink-300 focus:outline-none disabled:bg-gray-100 disabled:text-gray-500"
                                                     @input="calculateTotal(order)"
+                                                    :disabled="!canEditWeight(order.orderStatus)"
                                                 />
                                                 <button
                                                     @click="removeItem(order, index)"
-                                                    class="ml-1 text-red-400 hover:text-red-600"
+                                                    class="ml-1 text-red-400 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     title="Hapus Item"
+                                                    :disabled="!canEditWeight(order.orderStatus)"
                                                 >
                                                     <span class="material-icons text-sm">delete</span>
                                                 </button>
@@ -289,7 +292,8 @@
                                         <td colspan="2" class="py-2 text-center">
                                             <button
                                                 @click="addItem(order)"
-                                                class="flex items-center justify-center gap-1 text-sm font-medium text-pink-500 hover:text-pink-700 hover:underline"
+                                                class="flex items-center justify-center gap-1 text-sm font-medium text-pink-500 hover:text-pink-700 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                                                :disabled="!canEditWeight(order.orderStatus)"
                                             >
                                                 <span class="material-icons text-sm">add_circle</span>
                                                 Tambah Item
@@ -615,7 +619,9 @@ const markAsDone = (order: Order) => {
 };
 
 const updateOrder = (order: Order) => {
-    if (!order.weight || order.weight <= 0) {
+    const weightRequiredStatuses = ['Selesai Diproses', 'Siap Diantar', 'Siap Diambil', 'Selesai'];
+    
+    if (weightRequiredStatuses.includes(order.orderStatus) && (!order.weight || order.weight <= 0)) {
         alert('Masukkan jumlah/berat laundry terlebih dahulu!');
         return;
     }
@@ -627,15 +633,14 @@ const updateOrder = (order: Order) => {
         {
             status_pesanan: order.orderStatus,
             status_pembayaran: order.paymentStatus,
-            berat: order.weight, // Sum of quantities
-            harga_per_kg: 0, // Not used anymore
+            berat: order.weight, 
+            harga_per_kg: 0, 
             total: order.total,
-            items: order.parsedItems, // Send detailed items
+            items: order.parsedItems,
         },
         {
             onSuccess: () => {
                 alert('Order berhasil diperbarui');
-                // Restore state after props update
                 restoreState(savedState);
             },
             onError: (errors) => {
@@ -657,9 +662,7 @@ const deleteOrder = (id: number) => {
     }
 };
 
-// ------------------------------------------------
-// REFRESH FROM DATABASE (PENTING)
-// ------------------------------------------------
+
 const refreshOrders = () => {
     const savedState = captureState();
     isRefreshing.value = true;
@@ -672,9 +675,7 @@ const refreshOrders = () => {
     });
 };
 
-// ------------------------------------------------
-// STATUS STYLE HELPERS
-// ------------------------------------------------
+
 const statusClass = (status: string) => {
     switch (status) {
         case 'Menunggu Penjemputan':
@@ -759,18 +760,41 @@ const fmt = (isoOrString: unknown) => {
     }
 };
 
-const statusOptions = [
-    'Menunggu Penjemputan',
-    'Sedang Diproses',
-    'Selesai Diproses',
-    'Siap Diambil',
-    'Siap Diantar',
-    'Selesai',
-    'Batal',
-];
+const getStatusOptions = (order: Order) => {
+    let deliveryOptions: string[] = [];
+    
+    const method = (order.deliveryMethod || '').toLowerCase();
+
+    if (method.includes('antar')) {
+        deliveryOptions = ['Siap Diantar'];
+    } else {
+        // Default atau jika 'ambil'
+        deliveryOptions = ['Siap Diambil'];
+    }
+    
+    // Gabungkan urutan:
+    // Menunggu Penjemputan -> Sedang Diproses -> Selesai Diproses -> [Siap...] -> Selesai -> Batal
+    // Kita sisipkan deliveryOptions sebelum 'Selesai'
+    return [
+        'Menunggu Penjemputan',
+        'Sedang Diproses',
+        'Selesai Diproses',
+        ...deliveryOptions, 
+        'Selesai', 
+        'Batal'
+    ];
+};
 
 const clearSearch = () => {
     searchQuery.value = '';
+};
+
+// Check if weight/items can be edited based on status
+const canEditWeight = (status: string) => {
+    // Disabled if: Menunggu Penjemputan, Sedang Diproses, Batal
+    // Enabled if: Selesai Diproses, Siap Diantar, Siap Diambil, Selesai
+    const disabledStatuses = ['Menunggu Penjemputan', 'Sedang Diproses', 'Batal'];
+    return !disabledStatuses.includes(status);
 };
 
 const getWhatsAppLink = (phone: string, name: string) => {

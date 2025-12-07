@@ -85,6 +85,13 @@
                             >Ingat saya</label
                         >
                     </div>
+                    <p class="text-right">
+                        <a href="/forgot-password"
+                            class="text-sm text-blue-500 hover:underline"
+                        >
+                            Lupa password?
+                        </a>
+                    </p>
                 </div>
 
                 <button
