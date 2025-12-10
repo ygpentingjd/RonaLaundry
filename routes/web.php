@@ -11,9 +11,12 @@ use App\Http\Controllers\LaundryHistoryController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\UserOrderController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+
 
 // Landing Page
 Route::get('/', fn() => Inertia::render('LandingPage', [
@@ -27,6 +30,27 @@ Route::middleware('guest')->group(function () {
 
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.process');
     Route::post('/register', [RegisteredUserController::class, 'store'])->name('register.process');
+
+    // Halaman lupa password
+    Route::get('/forgot-password', function () {
+        return Inertia::render('ForgotPassword');
+    })->name('password.request');
+
+    // Kirim link reset password
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->name('password.email');
+
+    // Halaman reset password (via link email)
+    Route::get('/reset-password/{token}', function ($token) {
+        return Inertia::render('ResetPassword', [
+            'token' => $token,
+            'email' => request('email')
+        ]);
+    })->name('password.reset');
+
+    // Simpan password baru
+    Route::post('/reset-password', [NewPasswordController::class, 'store'])
+        ->name('password.update');        
 });
 
 // User Login Required

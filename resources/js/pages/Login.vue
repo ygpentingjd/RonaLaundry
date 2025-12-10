@@ -1,18 +1,18 @@
 <template>
     <Head title="Login - RonaLaundry" />
     <div
-        class="relative flex flex-col items-center justify-center min-h-screen bg-white"
+        class="relative flex min-h-screen flex-col items-center justify-center bg-white"
     >
         <div
-            class="relative w-full max-w-md p-8 bg-white border border-gray-300 shadow-md rounded-xl"
+            class="relative w-full max-w-md rounded-xl border border-gray-300 bg-white p-8 shadow-md"
         >
             <!-- 🔹 Icon User -->
             <div
-                class="absolute flex items-center justify-center w-16 h-16 transform -translate-x-1/2 bg-white border-2 border-gray-300 rounded-full -top-8 left-1/2"
+                class="absolute -top-8 left-1/2 flex h-16 w-16 -translate-x-1/2 transform items-center justify-center rounded-full border-2 border-gray-300 bg-white"
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    class="w-8 h-8 text-gray-600"
+                    class="h-8 w-8 text-gray-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -27,15 +27,15 @@
             </div>
 
             <!-- 🔹 Toggle -->
-            <div class="flex justify-center mt-8 mb-6">
+            <div class="mt-8 mb-6 flex justify-center">
                 <button
-                    class="px-5 py-2 font-semibold text-gray-600 bg-blue-200 rounded-l-md"
+                    class="rounded-l-md bg-blue-200 px-5 py-2 font-semibold text-gray-600"
                     @click="goToRegister"
                 >
                     SIGNUP
                 </button>
                 <button
-                    class="px-5 py-2 font-semibold text-white bg-blue-500 rounded-r-md"
+                    class="rounded-r-md bg-blue-500 px-5 py-2 font-semibold text-white"
                 >
                     LOGIN
                 </button>
@@ -46,7 +46,7 @@
                 <div class="space-y-4">
                     <div>
                         <label
-                            class="block mb-1 text-sm font-bold text-gray-800"
+                            class="mb-1 block text-sm font-bold text-gray-800"
                             >Username</label
                         >
                         <input
@@ -54,14 +54,14 @@
                             type="text"
                             placeholder="Masukkan username"
                             required
-                            class="w-full px-3 py-2 text-gray-800 border border-gray-400 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
+                            class="w-full rounded-md border border-gray-400 px-3 py-2 text-gray-800 focus:ring focus:ring-blue-300 focus:outline-none"
                             autocomplete="off"
                         />
                     </div>
 
                     <div>
                         <label
-                            class="block mb-1 text-sm font-bold text-gray-800"
+                            class="mb-1 block text-sm font-bold text-gray-800"
                             >Password</label
                         >
                         <input
@@ -69,7 +69,7 @@
                             type="password"
                             placeholder="Masukkan password"
                             required
-                            class="w-full px-3 py-2 text-gray-800 border border-gray-400 rounded-md focus:ring focus:ring-blue-300 focus:outline-none"
+                            class="w-full rounded-md border border-gray-400 px-3 py-2 text-gray-800 focus:ring focus:ring-blue-300 focus:outline-none"
                             autocomplete="off"
                         />
                     </div>
@@ -86,8 +86,11 @@
                         >
                     </div>
                     <p class="text-right">
-                        <a href="/forgot-password"
-                            class="text-sm text-blue-500 hover:underline"
+                        <a
+                            href="#"
+                            @click.prevent="goToForgotPassword"
+                            class="text-sm font-medium text-pink-500 hover:underline focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 focus:outline-none"
+                            aria-label="Lupa password, menuju halaman reset"
                         >
                             Lupa password?
                         </a>
@@ -96,13 +99,13 @@
 
                 <button
                     type="submit"
-                    class="w-full py-2 mt-6 font-bold text-white transition bg-pink-400 rounded-md hover:bg-pink-500"
+                    class="mt-6 w-full rounded-md bg-pink-400 py-2 font-bold text-white transition hover:bg-pink-500"
                 >
                     LOGIN
                 </button>
             </form>
 
-            <p class="mt-4 text-sm text-center text-gray-600">
+            <p class="mt-4 text-center text-sm text-gray-600">
                 Belum punya akun?
                 <a
                     @click.prevent="goToRegister"
@@ -117,8 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3'
-import { router, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 
 const form = useForm({
     username: '',
@@ -127,23 +129,30 @@ const form = useForm({
 });
 
 function handleLogin() {
-  // jika ada afterLoginRedirect yang disimpan (misal user menekan reservasi sebelum login),
-  // kirim sebagai query 'redirect' ke server agar server bisa redirect ke tempat itu.
-  const redirectTo = localStorage.getItem('afterLoginRedirect')
-  const url = redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}` : '/login'
+    // jika ada afterLoginRedirect yang disimpan (misal user menekan reservasi sebelum login),
+    // kirim sebagai query 'redirect' ke server agar server bisa redirect ke tempat itu.
+    const redirectTo = localStorage.getItem('afterLoginRedirect');
+    const url = redirectTo
+        ? `/login?redirect=${encodeURIComponent(redirectTo)}`
+        : '/login';
 
-  form.post(url, {
-    onSuccess: () => {
-      // jangan panggil router.visit('/landing') — Inertia akan mengikuti redirect dari server
-      localStorage.removeItem('afterLoginRedirect') // hapus agar tidak ketempel lagi
-    },
-    onError: () => {
-      alert('Login gagal! Periksa kembali username dan password anda.')
-    },
-  })
+    form.post(url, {
+        onSuccess: () => {
+            // jangan panggil router.visit('/landing') — Inertia akan mengikuti redirect dari server
+            localStorage.removeItem('afterLoginRedirect'); // hapus agar tidak ketempel lagi
+        },
+        onError: () => {
+            alert('Login gagal! Periksa kembali username dan password anda.');
+        },
+    });
 }
 
 function goToRegister() {
     router.visit('/register');
+}
+
+function goToForgotPassword() {
+    // Navigasi ke halaman ForgotPassword (Inertia page under auth/ForgotPassword.vue)
+    router.visit('/forgot-password');
 }
 </script>
