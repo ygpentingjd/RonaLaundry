@@ -22,7 +22,7 @@ const inputEmail = ref(props.email);
 
 ```
     <Form
-        v-bind="NewPasswordController.store.form()"
+        v-bind="(NewPasswordController.store as any).form()"
         :transform="(data) => ({ ...data, token, email })"
         :reset-on-success="['password', 'password_confirmation']"
         v-slot="{ errors, processing }"

@@ -16,7 +16,6 @@
             </div>
         </div>
 
-        <!-- 🔹 Stats Cards -->
         <div class="mb-8 grid grid-cols-4 gap-6">
             <div
                 v-for="card in stats"
@@ -35,7 +34,7 @@
             </div>
         </div>
 
-        <!-- 🔹 Chart -->
+
         <div class="mb-8 rounded-xl bg-white p-6 shadow-md">
             <h3 class="mb-4 font-semibold text-gray-700">Pemasukan 12 Bulan Terakhir</h3>
             <div class="h-96">

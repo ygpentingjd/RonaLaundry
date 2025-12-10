@@ -30,7 +30,7 @@ defineProps<{ status?: string }>();
 
     <div class="space-y-6">
         <Form
-            v-bind="PasswordResetLinkController.store.form()"
+            v-bind="(PasswordResetLinkController.store as any).form()"
             v-slot="{ errors, processing }"
         >
             <div class="grid gap-3">

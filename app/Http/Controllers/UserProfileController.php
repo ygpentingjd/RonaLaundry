@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Reservasi;
 use Inertia\Inertia;
 
-class ProfileController extends Controller
+class UserProfileController extends Controller
 {
     public function index()
     {

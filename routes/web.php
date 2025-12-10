@@ -3,7 +3,7 @@
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\ReservasiController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
@@ -40,13 +40,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reservasi', [ReservasiController::class, 'create'])->name('reservasi');
     Route::get('/order', [UserOrderController::class, 'index'])->name('order');
 
-    Route::get('/user-profile', [ProfileController::class, 'index'])->name('profile');
+    Route::get('/user-profile', [UserProfileController::class, 'index'])->name('profile');
 
     Route::get('/test', fn() => Inertia::render('test'))->name('test');
     Route::get('/laundryhistory', [LaundryHistoryController::class, 'index'])->name('laundryhistory');
 
     Route::get('/mylaundry', [ReservasiController::class, 'index'])->name('mylaundry');
-    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/update', [UserProfileController::class, 'update'])->name('user-profile.update');
     Route::post('/reservasi/store', [ReservasiController::class, 'store'])->name('reservasi.store');
     Route::post('/reservasi/{id}/cancel', [ReservasiController::class, 'cancel'])->name('reservasi.cancel');
 });
