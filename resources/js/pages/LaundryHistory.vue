@@ -2,7 +2,7 @@
     <Head title="Laundry History - RonaLaundry" />
     <UserLayout>
         <!-- Header -->
-        <div class="mb-8 flex items-center justify-between">
+        <div class="flex items-center justify-between mb-8">
             <h2 class="text-2xl font-bold text-gray-800">Riwayat Laundry</h2>
         </div>
 
@@ -11,16 +11,16 @@
             <div
                 v-for="order in completedOrders"
                 :key="order.id"
-                class="rounded-2xl border border-pink-100 bg-white p-6 shadow-md transition duration-200 hover:shadow-lg"
+                class="p-6 transition duration-200 bg-white border border-pink-100 shadow-md rounded-2xl hover:shadow-lg"
             >
                 <!-- Header Card -->
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="flex items-center gap-3">
                             <div
-                                class="flex h-8 w-8 items-center justify-center rounded-full bg-pink-400 font-semibold text-white"
+                                class="flex items-center justify-center w-8 h-8 font-semibold text-white bg-pink-400 rounded-full"
                             >
-                                <span class="material-icons text-sm"
+                                <span class="text-sm material-icons"
                                     >done_all</span
                                 >
                             </div>
@@ -29,16 +29,16 @@
                             </h3>
                         </div>
                         <div
-                            class="mt-1 flex items-center gap-1 text-sm text-gray-500"
+                            class="flex items-center gap-1 mt-1 text-sm text-gray-500"
                         >
-                            <span class="material-icons text-sm">schedule</span>
+                            <span class="text-sm material-icons">schedule</span>
                             {{ order.date }}
                         </div>
                     </div>
 
                     <button
                         @click="toggleDetail(order.id)"
-                        class="rounded-lg bg-pink-400 px-4 py-1 text-sm text-white shadow transition hover:bg-pink-500"
+                        class="px-4 py-1 text-sm text-white transition bg-pink-400 rounded-lg shadow hover:bg-pink-500"
                     >
                         {{
                             expandedOrder === order.id
@@ -57,7 +57,7 @@
                         <!-- 🔹 Identitas Pemesan -->
                         <div>
                             <p class="mb-2 font-semibold">Identitas Pemesan</p>
-                            <table class="mb-2 w-full">
+                            <table class="w-full mb-2">
                                 <tbody>
                                     <tr>
                                         <td class="py-1">Nama Pemesan</td>
@@ -91,7 +91,7 @@
                         <div>
                             <p class="mb-2 font-semibold">Status Pembayaran</p>
                             <span
-                                class="rounded-full px-3 py-1 text-sm font-medium"
+                                class="px-3 py-1 text-sm font-medium rounded-full"
                                 :class="{
                                     'bg-green-100 text-green-700':
                                         order.paymentStatus === 'Lunas',
@@ -109,7 +109,7 @@
                                 Status Pesanan
                             </p>
                             <span
-                                class="rounded-full border px-3 py-1 text-sm font-medium"
+                                class="px-3 py-1 text-sm font-medium border rounded-full"
                                 :class="statusClass(order.status)"
                             >
                                 {{ order.status }}
@@ -119,7 +119,7 @@
                         <!-- 🔹 Detail Order -->
                         <div>
                             <p class="mt-4 mb-2 font-semibold">Detail Order</p>
-                            <table class="mb-4 w-full">
+                            <table class="w-full mb-4">
                                 <tbody>
                                     <tr>
                                         <td class="py-1">Jenis Layanan</td>
@@ -155,7 +155,7 @@
                                             Total
                                         </td>
                                         <td
-                                            class="pt-3 text-right font-bold text-gray-900"
+                                            class="pt-3 font-bold text-right text-gray-900"
                                         >
                                             Rp
                                             {{
@@ -170,16 +170,16 @@
                         <!-- 🔹 Keterangan Tambahan -->
                         <div v-if="order.notes" class="mt-3">
                             <p class="mb-1 font-semibold">Catatan:</p>
-                            <p class="text-gray-600 italic">
+                            <p class="italic text-gray-600">
                                 {{ order.notes }}
                             </p>
                         </div>
 
                         <!-- 🔹 Info Tanggal -->
                         <div
-                            class="mt-4 flex items-center gap-1 text-xs text-gray-500"
+                            class="flex items-center gap-1 mt-4 text-xs text-gray-500"
                         >
-                            <span class="material-icons text-sm"
+                            <span class="text-sm material-icons"
                                 >event_available</span
                             >
                             {{ order.date }}
@@ -193,7 +193,7 @@
                 v-if="completedOrders.length === 0"
                 class="mt-10 text-center text-gray-500"
             >
-                Belum ada riwayat laundry selesai 😌
+                Belum ada riwayat laundry selesai
             </p>
         </div>
     </UserLayout>

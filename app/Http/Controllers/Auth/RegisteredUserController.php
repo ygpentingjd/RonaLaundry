@@ -48,6 +48,6 @@ class RegisteredUserController extends Controller
 
         // $request->session()->regenerate();
 
-        return redirect()->route('login')->with('success', 'Akun berhasil dibuat! Silakan login untuk melanjutkan.');
+        return redirect()->route('login')->with('success', 'Silahkan verifikasi email terlebih dahulu!');
     }
 }

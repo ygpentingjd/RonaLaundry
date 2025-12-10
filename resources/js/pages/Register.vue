@@ -145,17 +145,23 @@ const form = ref({
 
 function handleSubmit() {
     router.post('/register', form.value, {
-        onSuccess: () => {
+        onSuccess: (page) => {
+            const flash = (page.props as any).flash;
+            const message = flash?.success;
+
+            if (message) {
+                alert(message);
+            }
+
             router.visit('/login');
         },
         onError: (errors) => {
             console.error(errors);
-            alert(
-                'Terjadi kesalahan saat mendaftar, periksa kembali data Anda.',
-            );
+            alert('Terjadi kesalahan saat mendaftar, periksa kembali data Anda.');
         },
     });
 }
+
 
 function goToLogin() {
     router.visit('/login');
