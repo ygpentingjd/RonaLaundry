@@ -360,30 +360,38 @@ const viewDetails = (payment: Payment) => {
 };
 
 const verifyPayment = (id: number) => {
-    if (confirm('Are you sure you want to verify this payment?')) {
+    if (confirm('Verifikasi pembayaran ini?')) {
         router.post(
             `/admin/payments/${id}/verify`,
             {},
             {
                 onSuccess: () => {
                     selectedPayment.value = null;
-                    alert("✅ Payment verified successfully!");
+                    alert("✅ Pembayaran berhasil diverifikasi!");
                 },
+                onError: (errors) => {
+                    console.error('Verifikasi pembayaran gagal:', errors);
+                    alert("❌ Verifikasi pembayaran gagal: " + JSON.stringify(errors));
+                }
             },
         );
     }
 };
 
 const rejectPayment = (id: number) => {
-    if (confirm('Are you sure you want to reject this payment?')) {
+    if (confirm('Tolak pembayaran ini?')) {
         router.post(
             `/admin/payments/${id}/reject`,
             {},
             {
                 onSuccess: () => {
                     selectedPayment.value = null;
-                    alert("❌ Payment rejected.");
+                    alert("❌ Pembayaran ditolak.");
                 },
+                onError: (errors) => {
+                    console.error('Pembayaran ditolak:', errors);
+                    alert("❌ Pembayaran ditolak: " + JSON.stringify(errors));
+                }
             },
         );
     }

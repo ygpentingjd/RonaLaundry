@@ -70,31 +70,41 @@ class AdminPaymentController extends Controller
 
     public function verify($id)
     {
-        $order = Reservasi::findOrFail($id);
-        $order->payment_status = 'Lunas'; 
-        $order->status_pembayaran = 'Lunas'; // Sync duplicate column
-        $order->save();
+        try {
+            $order = Reservasi::findOrFail($id);
+            $order->payment_status = 'Lunas'; 
+            $order->status_pembayaran = 'Lunas'; // Sync duplicate column
+            $order->save();
 
-        // Also update Pembayaran record if exists
-        if ($order->infoPembayaran) {
-            $order->infoPembayaran->update(['status' => 'Lunas']);
+            // Also update Pembayaran record if exists
+            if ($order->infoPembayaran) {
+                $order->infoPembayaran->update(['status' => 'Lunas']);
+            }
+
+            return back()->with('success', 'Payment verified successfully!');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Payment verification failed: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Payment verification failed: ' . $e->getMessage()]);
         }
-
-        return back()->with('success', 'Payment verified successfully!');
     }
 
     public function reject($id)
     {
-        $order = Reservasi::findOrFail($id);
-        $order->payment_status = 'Rejected';
-        $order->status_pembayaran = 'Rejected'; // Sync duplicate column
-        $order->save();
+        try {
+            $order = Reservasi::findOrFail($id);
+            $order->payment_status = 'Rejected';
+            $order->status_pembayaran = 'Rejected'; // Sync duplicate column
+            $order->save();
 
-        // Also update Pembayaran record if exists
-        if ($order->infoPembayaran) {
-            $order->infoPembayaran->update(['status' => 'Rejected']);
+            // Also update Pembayaran record if exists
+            if ($order->infoPembayaran) {
+                $order->infoPembayaran->update(['status' => 'Rejected']);
+            }
+
+            return back()->with('success', 'Payment rejected.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Payment rejection failed: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Payment rejection failed: ' . $e->getMessage()]);
         }
-
-        return back()->with('success', 'Payment rejected.');
     }
 }
