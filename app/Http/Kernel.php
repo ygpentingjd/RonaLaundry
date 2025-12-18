@@ -28,10 +28,10 @@ class Kernel extends HttpKernel
     /**
      * The application's route middleware.
      */
-    protected $routeMiddleware = [
-        'auth' => \App\Http\Middleware\Authenticate::class,
-        'role' => \App\Http\Middleware\RoleMiddleware::class,
-        'appearance' => \App\Http\Middleware\HandleAppearance::class,
-
-    ];
+   protected $routeMiddleware = [
+    'auth' => \App\Http\Middleware\Authenticate::class,
+    'role' => \App\Http\Middleware\RoleMiddleware::class,
+    'admin' => \App\Http\Middleware\AdminMiddleware::class, 
+    'appearance' => \App\Http\Middleware\HandleAppearance::class,
+];
 }
