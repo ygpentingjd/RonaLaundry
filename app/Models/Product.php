@@ -17,4 +17,9 @@ class Product extends Model
         'deskripsi',
         'image',
     ];
+
+    public function getRouteKeyName()
+    {
+        return 'id_product';
+    }
 }
