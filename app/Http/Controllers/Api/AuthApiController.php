@@ -37,13 +37,13 @@ class AuthApiController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'username' => 'required|string',
             'password' => 'required',
         ]);
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (!Auth::attempt($request->only('username', 'password'))) {
             return response()->json([
-                'message' => 'Email atau password salah'
+                'message' => 'Username atau password salah'
             ], 401);
         }
 
@@ -57,4 +57,4 @@ class AuthApiController extends Controller
             'token_type' => 'Bearer'
         ]);
     }
-    }
+}
