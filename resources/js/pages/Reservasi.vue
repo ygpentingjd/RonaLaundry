@@ -4,6 +4,9 @@ import Footer from '../components/Footer.vue'
 import Hero from '../components/Hero1.vue'
 import { ref } from 'vue'
 import { router } from '@inertiajs/vue3'
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
 
 const props = defineProps<{
     user?: {
@@ -83,7 +86,7 @@ const submitForm = () => {
     pesan: pesan.value
   }, {
     onSuccess: () => {
-      alert('Pesanan berhasil disimpan! 😊')
+      toast.success('Pesanan berhasil disimpan! 😊')
       // Reset form setelah submit
       nama.value = ''
       whatsapp.value = ''
@@ -98,7 +101,7 @@ const submitForm = () => {
     },
     onError: (errors) => {
       console.error(errors)
-      alert('Gagal menyimpan pesanan. Periksa kembali data Anda.')
+      toast.error('Gagal menyimpan pesanan. Periksa kembali data Anda.')
     }
   })
 }

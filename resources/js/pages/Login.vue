@@ -121,6 +121,9 @@
 
 <script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3';
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
 
 const form = useForm({
     username: '',
@@ -140,9 +143,10 @@ function handleLogin() {
         onSuccess: () => {
             // jangan panggil router.visit('/landing') — Inertia akan mengikuti redirect dari server
             localStorage.removeItem('afterLoginRedirect'); // hapus agar tidak ketempel lagi
+            toast.success("Login berhasil!");
         },
         onError: () => {
-            alert('Login gagal! Periksa kembali username dan password anda.');
+            toast.error('Login gagal! Periksa kembali username dan password anda.');
         },
     });
 }

@@ -183,6 +183,10 @@ import { Head, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { computed, onMounted, ref } from 'vue';
 import AdminPanel from '../AdminPanel.vue';
+import { useToast } from "vue-toastification";
+import Swal from 'sweetalert2';
+
+const toast = useToast();
 
 // --- tipe untuk data mentah dari server (snake_case) ---
 interface UserRaw {
@@ -296,16 +300,17 @@ function closeForm() {
 }
 
 // Save (create/update)
+// Save (create/update)
 async function saveUser() {
     try {
         const payload = { ...formUser.value };
 
         if (isEditing.value && editingId.value) {
             await axios.put(`/admin/users/${editingId.value}`, payload);
-            alert('User berhasil diperbarui');
+            toast.success('User berhasil diperbarui');
         } else {
             await axios.post('/admin/users', payload);
-            alert('User berhasil ditambahkan');
+            toast.success('User berhasil ditambahkan');
         }
 
         showForm.value = false;
@@ -313,26 +318,35 @@ async function saveUser() {
     } catch (err: any) {
         if (err.response?.status === 422) {
             console.error('Validation errors:', err.response.data.errors);
-            alert('Validasi gagal. Cek input.');
+            toast.error('Validasi gagal. Cek input.');
         } else {
             console.error(err);
-            alert('Terjadi kesalahan. Lihat console.');
+            toast.error('Terjadi kesalahan. Lihat console.');
         }
     }
 }
 
 async function deleteUser(id: number) {
-    const ok = confirm('Yakin ingin menghapus user ini?');
-    if (!ok) return;
-
-    try {
-        await axios.delete(`/admin/users/${id}`);
-        alert('User berhasil dihapus');
-        router.reload({ only: ['users'] });
-    } catch (err) {
-        console.error(err);
-        alert('Gagal menghapus user.');
-    }
+    Swal.fire({
+        title: 'Yakin ingin menghapus user ini?',
+        text: "Data yang dihapus tidak dapat dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Hapus!'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                await axios.delete(`/admin/users/${id}`);
+                toast.success('User berhasil dihapus');
+                router.reload({ only: ['users'] });
+            } catch (err) {
+                console.error(err);
+                toast.error('Gagal menghapus user.');
+            }
+        }
+    });
 }
 
 function formatDate(date: string | Date | null | undefined) {

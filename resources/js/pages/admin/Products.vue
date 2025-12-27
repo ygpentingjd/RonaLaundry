@@ -363,6 +363,10 @@ import { Head, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { computed, ref } from 'vue';
 import AdminPanel from '../AdminPanel.vue';
+import { useToast } from "vue-toastification";
+import Swal from 'sweetalert2';
+
+const toast = useToast();
 
 interface ProductRaw {
     id_product: number; // Adjusted to match Model primary key
@@ -483,12 +487,12 @@ function handleFileDrop(e: DragEvent) {
 function handleSelectedFile(file: File) {
     const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
     if (!allowed.includes(file.type)) {
-        alert('Format file tidak didukung. Gunakan JPG, JPEG, PNG, atau WebP.');
+        toast.error('Format file tidak didukung. Gunakan JPG, JPEG, PNG, atau WebP.');
         return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-        alert('Ukuran file terlalu besar (max 2MB).');
+        toast.error('Ukuran file terlalu besar (max 2MB).');
         return;
     }
 
@@ -513,7 +517,7 @@ async function submitForm() {
         !form.value.satuan ||
         !form.value.harga_reguler
     ) {
-        alert('Nama barang, satuan, dan harga reguler wajib diisi.');
+        toast.warning('Nama barang, satuan, dan harga reguler wajib diisi.');
         return;
     }
 
@@ -537,19 +541,19 @@ async function submitForm() {
             await axios.post(`/products/${form.value.id}`, fd, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-            alert('Produk berhasil diperbarui');
+            toast.success('Produk berhasil diperbarui');
         } else {
             await axios.post('/products', fd, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-            alert('Produk berhasil ditambahkan');
+            toast.success('Produk berhasil ditambahkan');
         }
 
         closeForm();
         router.reload({ only: ['products'] }); // Reload props from Inertia
     } catch (e: any) {
         console.error(e);
-        alert(
+        toast.error(
             e?.response?.data?.message ||
                 'Terjadi kesalahan saat menyimpan produk.',
         );
@@ -576,26 +580,37 @@ async function saveChanges(product: any) {
         await axios.post(`/products/${product.id}`, fd, { 
             headers: { 'Content-Type': 'multipart/form-data' },
         });
-        alert('Perubahan disimpan');
+        toast.success('Perubahan disimpan');
     } catch (e: any) {
         console.error(e);
-        alert('Gagal menyimpan perubahan: ' + (e.response?.data?.message || 'Error'));
+        toast.error('Gagal menyimpan perubahan: ' + (e.response?.data?.message || 'Error'));
     }
 }
 
 function confirmDelete(product: any) {
-    if (!confirm(`Hapus produk "${product.name}"?`)) return;
-    deleteProduct(product.id);
+    Swal.fire({
+        title: `Hapus produk "${product.name}"?`,
+        text: "Data yang dihapus tidak dapat dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Hapus!'
+    }).then((result: any) => {
+        if (result.isConfirmed) {
+            deleteProduct(product.id);
+        }
+    });
 }
 
 async function deleteProduct(id: number) {
     try {
         await axios.delete(`/products/${id}`);
-        alert('Produk dihapus');
+        toast.success('Produk dihapus');
         window.location.reload();
     } catch (e) {
         console.error(e);
-        alert('Gagal menghapus produk');
+        toast.error('Gagal menghapus produk');
     }
 }
 

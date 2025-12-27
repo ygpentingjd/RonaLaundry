@@ -385,10 +385,11 @@
 import { Head, router } from '@inertiajs/vue3';
 import { computed, onMounted, ref } from 'vue';
 import AdminPanel from '../AdminPanel.vue';
+import { useToast } from "vue-toastification";
+import Swal from 'sweetalert2';
 
-// ------------------------------------------------
-// TYPES
-// ------------------------------------------------
+const toast = useToast();
+
 interface Order {
     id: number;
     customer: string;
@@ -612,17 +613,28 @@ const selectStatus = (order: Order, status: string) => {
 // UPDATE & DELETE
 // ------------------------------------------------
 const markAsDone = (order: Order) => {
-    if (confirm('Tandai pesanan ini sebagai Selesai?')) {
-        order.orderStatus = 'Selesai';
-        updateOrder(order);
-    }
+    Swal.fire({
+        title: 'Tandai pesanan ini sebagai Selesai?',
+        text: "Status akan diubah menjadi Selesai!",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Selesai!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            order.orderStatus = 'Selesai';
+            updateOrder(order);
+        }
+    });
 };
 
 const updateOrder = (order: Order) => {
+    // ... logic ...
     const weightRequiredStatuses = ['Selesai Diproses', 'Siap Diantar', 'Siap Diambil', 'Selesai'];
     
     if (weightRequiredStatuses.includes(order.orderStatus) && (!order.weight || order.weight <= 0)) {
-        alert('Masukkan jumlah/berat laundry terlebih dahulu!');
+        toast.warning('Masukkan jumlah/berat laundry terlebih dahulu!');
         return;
     }
 
@@ -640,26 +652,36 @@ const updateOrder = (order: Order) => {
         },
         {
             onSuccess: () => {
-                alert('Order berhasil diperbarui');
+                toast.success('Order berhasil diperbarui');
                 restoreState(savedState);
             },
             onError: (errors) => {
                 console.error(errors);
-                alert('Gagal memperbarui order');
+                toast.error('Gagal memperbarui order');
             },
         },
     );
 };
 
 const deleteOrder = (id: number) => {
-    if (confirm('Yakin ingin menghapus order ini?')) {
-        router.delete(`/admin/orders/${id}`, {
-            onSuccess: () => {
-                alert('Order berhasil dihapus');
-                router.reload({ only: ['orders'] });
-            },
-        });
-    }
+    Swal.fire({
+        title: 'Yakin ingin menghapus order ini?',
+        text: "Data yang dihapus tidak dapat dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Hapus!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(`/admin/orders/${id}`, {
+                onSuccess: () => {
+                    toast.success('Order berhasil dihapus');
+                    router.reload({ only: ['orders'] });
+                },
+            });
+        }
+    });
 };
 
 

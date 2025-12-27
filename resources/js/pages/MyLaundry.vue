@@ -35,6 +35,12 @@
                     </div>
 
                     <button
+                        @click="viewInvoice(order)"
+                        class="mr-2 rounded-lg border border-pink-500 px-4 py-1 text-sm text-pink-500 shadow transition hover:bg-pink-50"
+                    >
+                        Lihat Invoice
+                    </button>
+                    <button
                         @click="toggleDetail(order.id)"
                         class="rounded-lg bg-pink-400 px-4 py-1 text-sm text-white shadow transition hover:bg-pink-500"
                     >
@@ -250,6 +256,13 @@
                 Tidak ada pesanan aktif saat ini!
             </p>
         </div>
+
+        <!-- Invoice Modal -->
+        <InvoiceModal
+            :show="showInvoiceModal"
+            :order="selectedInvoiceOrder || {}"
+            @close="showInvoiceModal = false"
+        />
     </UserLayout>
 </template>
 
@@ -257,6 +270,10 @@
 import UserLayout from '@/layouts/UserLayout.vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { useToast } from "vue-toastification";
+import Swal from 'sweetalert2';
+
+const toast = useToast();
 
 // 🔹 Tipe sesuai data yang dikirim (bukti_pembayaran sudah di level utama)
 interface Order {
@@ -290,23 +307,34 @@ const toggleDetail = (id: number) => {
 };
 
 const cancelOrder = (id: number) => {
-    if (confirm('Yakin ingin membatalkan pesanan ini?')) {
-        router.post(
-            `/reservasi/${id}/cancel`,
-            {},
-            {
-                onSuccess: () => {
-                    orders.value = orders.value.filter(
-                        (order) => order.id !== id,
-                    );
-                    alert('Pesanan berhasil dibatalkan!');
+    Swal.fire({
+        title: 'Yakin ingin membatalkan pesanan ini?',
+        text: "Pesanan yang dibatalkan tidak dapat dikembalikan statusnya!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444', // red-500
+        cancelButtonColor: '#6b7280', // gray-500
+        confirmButtonText: 'Ya, batalkan!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.post(
+                `/reservasi/${id}/cancel`,
+                {},
+                {
+                    onSuccess: () => {
+                        orders.value = orders.value.filter(
+                            (order) => order.id !== id,
+                        );
+                        toast.success('Pesanan berhasil dibatalkan!');
+                    },
+                    onError: () => {
+                        toast.error('Gagal membatalkan pesanan.');
+                    },
                 },
-                onError: () => {
-                    alert('Gagal membatalkan pesanan.');
-                },
-            },
-        );
-    }
+            );
+        }
+    });
 };
 
 const selectPaymentFile = (e: Event, id: number) => {
@@ -318,7 +346,7 @@ const selectPaymentFile = (e: Event, id: number) => {
 
 const uploadPayment = (id: number) => {
     if (!paymentFiles.value[id]) {
-        alert('Silakan pilih gambar bukti terlebih dahulu.');
+        toast.warning('Silakan pilih gambar bukti terlebih dahulu.');
         return;
     }
 
@@ -329,7 +357,7 @@ const uploadPayment = (id: number) => {
     router.post(`/payment/upload/${id}`, formData, {
         forceFormData: true,
         onSuccess: () => {
-            alert('Bukti pembayaran berhasil diupload!');
+            toast.success('Bukti pembayaran berhasil diupload!');
             // Refresh agar data terbaru (termasuk bukti_pembayaran) muncul
             router.visit(route('mylaundry'), {
                 preserveState: false,
@@ -338,7 +366,7 @@ const uploadPayment = (id: number) => {
         },
         onError: (errors) => {
             console.error('Upload error:', errors);
-            alert('Gagal upload. Cek file (max 2MB, JPG/PNG).');
+            toast.error('Gagal upload. Cek file (max 2MB, JPG/PNG).');
         },
     });
 };
@@ -374,5 +402,29 @@ const formatFullDate = (dateStr?: string | null): string => {
         })
         .replace(':', '.');
     return `${tanggal} | ${waktu} WIB`;
+};
+
+// 🔹 Invoice Logics
+import InvoiceModal from '@/components/InvoiceModal.vue';
+const showInvoiceModal = ref(false);
+const selectedInvoiceOrder = ref<any>(null);
+
+const viewInvoice = (order: any) => {
+    selectedInvoiceOrder.value = {
+        ...order,
+        customer: order.nama, // Map 'nama' to 'customer'
+        address: order.alamat,
+        date: order.tanggal, // or created_at? 'tanggal' is "Jadwal Pengambilan" in previous table, let's use created_at if available or today
+        pickupDate: order.tanggal_kembali,
+        items: order.items,
+        total: order.total || (order.berat && order.harga_per_kg ? order.berat * order.harga_per_kg : 0),
+        paymentStatus: order.payment_status,
+        service: order.layanan,
+        weight: order.berat,
+        pricePerKg: order.harga_per_kg,
+        barang: order.barang,
+        notes: order.pesan
+    };
+    showInvoiceModal.value = true;
 };
 </script>

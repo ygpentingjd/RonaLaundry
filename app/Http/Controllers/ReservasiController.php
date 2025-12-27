@@ -14,6 +14,7 @@ class ReservasiController extends Controller
 {
     $reservasis = Reservasi::with('infoPembayaran')
         ->where('user_id', Auth::id())
+        ->whereNotIn('status', ['Selesai', 'Batal']) // Exclude completed/cancelled
         ->orderBy('created_at', 'desc')
         ->get()
         ->map(function ($r) {

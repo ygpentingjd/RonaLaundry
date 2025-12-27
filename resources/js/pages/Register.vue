@@ -134,6 +134,9 @@
 import { Head } from '@inertiajs/vue3'
 import { router } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
 
 const form = ref({
     username: '',
@@ -150,14 +153,16 @@ function handleSubmit() {
             const message = flash?.success;
 
             if (message) {
-                alert(message);
+                toast.success(message);
+            } else {
+                toast.success('Registrasi berhasil! Silakan login.');
             }
 
             router.visit('/login');
         },
         onError: (errors) => {
             console.error(errors);
-            alert('Terjadi kesalahan saat mendaftar, periksa kembali data Anda.');
+            toast.error('Terjadi kesalahan saat mendaftar, periksa kembali data Anda.');
         },
     });
 }

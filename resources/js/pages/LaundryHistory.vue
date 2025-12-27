@@ -36,6 +36,13 @@
                         </div>
                     </div>
 
+
+                    <button
+                        @click="viewInvoice(order)"
+                        class="mr-2 px-4 py-1 text-sm text-pink-500 transition border border-pink-500 rounded-lg shadow hover:bg-pink-50"
+                    >
+                        Lihat Invoice
+                    </button>
                     <button
                         @click="toggleDetail(order.id)"
                         class="px-4 py-1 text-sm text-white transition bg-pink-400 rounded-lg shadow hover:bg-pink-500"
@@ -196,6 +203,13 @@
                 Belum ada riwayat laundry selesai
             </p>
         </div>
+
+        <!-- INVOICE MODAL -->
+        <InvoiceModal
+            :show="showInvoiceModal"
+            :order="selectedInvoiceOrder || {}"
+            @close="showInvoiceModal = false"
+        />
     </UserLayout>
 </template>
 
@@ -218,6 +232,7 @@ const toggleDetail = (id: any) => {
     expandedOrder.value = expandedOrder.value === id ? null : id;
 };
 
+
 // 🔹 Warna status
 const statusClass = (status: string) => {
     switch (status) {
@@ -232,6 +247,25 @@ const statusClass = (status: string) => {
         default:
             return 'bg-gray-100 text-gray-700 border-gray-300';
     }
+};
+
+// 🔹 Invoice Logics
+import InvoiceModal from '@/components/InvoiceModal.vue';
+const showInvoiceModal = ref(false);
+const selectedInvoiceOrder = ref<any>(null);
+
+const viewInvoice = (order: any) => {
+    selectedInvoiceOrder.value = {
+        ...order,
+        // Map fields if necessary to match InvoiceModal expectation
+        customer: order.customer,
+        address: order.address,
+        date: order.date,
+        items: order.items,
+        total: order.total || (order.weight * order.pricePerKg),
+        paymentStatus: order.paymentStatus
+    };
+    showInvoiceModal.value = true;
 };
 </script>
 

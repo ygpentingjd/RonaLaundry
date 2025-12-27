@@ -270,6 +270,10 @@ kok tampilannya jadi bedaaa sama yang sebelumnya
 import { Head, router, Link } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import AdminPanel from '../AdminPanel.vue';
+import { useToast } from "vue-toastification";
+import Swal from 'sweetalert2';
+
+const toast = useToast();
 
 interface Payment {
     id: number;
@@ -360,41 +364,61 @@ const viewDetails = (payment: Payment) => {
 };
 
 const verifyPayment = (id: number) => {
-    if (confirm('Verifikasi pembayaran ini?')) {
-        router.post(
-            `/admin/payments/${id}/verify`,
-            {},
-            {
-                onSuccess: () => {
-                    selectedPayment.value = null;
-                    alert("✅ Pembayaran berhasil diverifikasi!");
+    Swal.fire({
+        title: 'Verifikasi pembayaran ini?',
+        text: "Pastikan bukti pembayaran valid!",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981', // green-500
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Verifikasi!'
+    }).then((result: any) => {
+        if (result.isConfirmed) {
+            router.post(
+                `/admin/payments/${id}/verify`,
+                {},
+                {
+                    onSuccess: () => {
+                        selectedPayment.value = null;
+                        toast.success("✅ Pembayaran berhasil diverifikasi!");
+                    },
+                    onError: (errors) => {
+                        console.error('Verifikasi pembayaran gagal:', errors);
+                        toast.error("❌ Verifikasi pembayaran gagal: " + JSON.stringify(errors));
+                    }
                 },
-                onError: (errors) => {
-                    console.error('Verifikasi pembayaran gagal:', errors);
-                    alert("❌ Verifikasi pembayaran gagal: " + JSON.stringify(errors));
-                }
-            },
-        );
-    }
+            );
+        }
+    });
 };
 
 const rejectPayment = (id: number) => {
-    if (confirm('Tolak pembayaran ini?')) {
-        router.post(
-            `/admin/payments/${id}/reject`,
-            {},
-            {
-                onSuccess: () => {
-                    selectedPayment.value = null;
-                    alert("❌ Pembayaran ditolak.");
+    Swal.fire({
+        title: 'Tolak pembayaran ini?',
+        text: "Pembayaran akan ditandai sebagai rejected!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444', // red-500
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Tolak!'
+    }).then((result: any) => {
+        if (result.isConfirmed) {
+            router.post(
+                `/admin/payments/${id}/reject`,
+                {},
+                {
+                    onSuccess: () => {
+                        selectedPayment.value = null;
+                        toast.error("❌ Pembayaran ditolak.");
+                    },
+                    onError: (errors) => {
+                        console.error('Pembayaran ditolak:', errors);
+                        toast.error("❌ Pembayaran ditolak: " + JSON.stringify(errors));
+                    }
                 },
-                onError: (errors) => {
-                    console.error('Pembayaran ditolak:', errors);
-                    alert("❌ Pembayaran ditolak: " + JSON.stringify(errors));
-                }
-            },
-        );
-    }
+            );
+        }
+    });
 };
 
 const closeModal = () => {
